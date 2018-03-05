@@ -72,6 +72,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         replay_recording_button = (Button) findViewById(R.id.replay_recording_btn);
         start_recording_button = (Button) findViewById(R.id.start_recording_btn);
         start_recording_button.setTag(1);
+        bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
+        triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
+        forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
     }
 
     private void setUpGraph() {
@@ -162,6 +165,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     public void updateFrequency(View view) {
         if(!TextUtils.isEmpty(bicep_frq_et.getText().toString())) {
             this.BICEP_FRQ = Integer.parseInt(bicep_frq_et.getText().toString());
+            bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
+            bicep_frq_et.setText("");
             DataPoint[] dataPoint = new DataPoint[] {
                     new DataPoint(BICEP_FRQ / 1000 , 1000)
             };
@@ -170,6 +175,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         } else {}
         if(!TextUtils.isEmpty(triceps_frq_et.getText().toString())) {
             this.TRICEPS_FRQ = Integer.parseInt(triceps_frq_et.getText().toString());
+            triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
+            triceps_frq_et.setText("");
             DataPoint[] dataPoint = new DataPoint[] {
                     new DataPoint(TRICEPS_FRQ / 1000 , 1000)
             };
@@ -178,6 +185,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         } else {}
         if(!TextUtils.isEmpty(forearm_frq_et.getText().toString())) {
             this.FOREARM_FRQ = Integer.parseInt(forearm_frq_et.getText().toString());
+            forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
+            forearm_frq_et.setText("");
             DataPoint[] dataPoint = new DataPoint[] {
                     new DataPoint(FOREARM_FRQ / 1000 , 1000)
             };
@@ -206,7 +215,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     }
 
     // replay recording button
-    public void replayRecording(View view) {
-        Toast.makeText(this , "To be implemented" , Toast.LENGTH_SHORT).show();
+    public void replayRecording(View view) { // TODO: to be implemented
     }
 }
