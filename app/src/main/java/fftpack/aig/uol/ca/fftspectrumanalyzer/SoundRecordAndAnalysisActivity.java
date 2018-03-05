@@ -43,7 +43,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private LineGraphSeries<DataPoint> frq_series , min_series , max_series; // data for the graph
     private BarGraphSeries<DataPoint> bicep_series , triceps_series , forearm_series;
     private double x_frq, y_frq , x_bicep , y_bicep , x_min , y_min , x_max , y_max; // x_frq and y_frq coordinates
-    private int BICEP_FRQ = 1 , TRICEPS_FRQ = 2 , FOREARM_FRQ = 4 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50;
+    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) { // when app in launched
@@ -139,6 +139,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         setTargetFrequencyLines(forearm_series , Color.MAGENTA , FOREARM_FRQ);
     }
 
+    // set max and min magnitude dashed lines
     public void setDashPaint(LineGraphSeries series , Paint paint , int color) {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(3);
@@ -149,8 +150,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         series.setCustomPaint(paint);
     }
 
+    // set target frequencies
     public void setTargetFrequencyLines(BarGraphSeries series , int color , int frq) {
-        series.appendData(new DataPoint(frq , 1000) , true , 1);
+        series.appendData(new DataPoint(frq / 1000 , 1000) , true , 1);
         series.setDataWidth(0.2f);
         series.setColor(color);
         graphView.addSeries(series);
@@ -186,7 +188,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
     public void generateData(int frq , BarGraphSeries<DataPoint> series) {
         series.resetData(new DataPoint[]{
-                new DataPoint(frq , 1000)
+                new DataPoint(frq / 1000, 1000)
         });
     }
 
