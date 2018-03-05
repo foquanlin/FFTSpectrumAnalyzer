@@ -1,5 +1,6 @@
 package fftpack.aig.uol.ca.fftspectrumanalyzer;
 
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -64,6 +65,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         frq_series = new LineGraphSeries<DataPoint>();
         min_series = new LineGraphSeries<DataPoint>();
         max_series = new LineGraphSeries<DataPoint>();
+        bicep_series = new BarGraphSeries<DataPoint>();
+        triceps_series = new BarGraphSeries<DataPoint>();
+        forearm_series = new BarGraphSeries<DataPoint>();
         update_frq_button = (Button) findViewById(R.id.update_frq_btn);
         replay_recording_button = (Button) findViewById(R.id.replay_recording_btn);
         start_recording_button = (Button) findViewById(R.id.start_recording_btn);
@@ -146,10 +150,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     }
 
     public void setTargetFrequencyLines(BarGraphSeries series , int color , int frq) {
-        series = new BarGraphSeries<DataPoint>(new DataPoint[] {
-                new DataPoint(frq , 1000)
-        });
-        series.setDataWidth(0.1f);
+        series.appendData(new DataPoint(frq , 1000) , true , 1);
+        series.setDataWidth(0.2f);
         series.setColor(color);
         graphView.addSeries(series);
     }
@@ -158,16 +160,34 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     public void updateFrequency(View view) {
         if(!TextUtils.isEmpty(bicep_frq_et.getText().toString())) {
             this.BICEP_FRQ = Integer.parseInt(bicep_frq_et.getText().toString());
-            Toast.makeText(this , "bicep frq = " + BICEP_FRQ , Toast.LENGTH_SHORT).show();
+            DataPoint[] dataPoint = new DataPoint[] {
+                    new DataPoint(BICEP_FRQ / 1000 , 1000)
+            };
+            bicep_series.resetData(dataPoint);
+            graphView.addSeries(bicep_series);
         } else {}
         if(!TextUtils.isEmpty(triceps_frq_et.getText().toString())) {
             this.TRICEPS_FRQ = Integer.parseInt(triceps_frq_et.getText().toString());
-            Toast.makeText(this , "triceps frq = " + TRICEPS_FRQ , Toast.LENGTH_SHORT).show();
+            DataPoint[] dataPoint = new DataPoint[] {
+                    new DataPoint(TRICEPS_FRQ / 1000 , 1000)
+            };
+            triceps_series.resetData(dataPoint);
+            graphView.addSeries(triceps_series);
         } else {}
         if(!TextUtils.isEmpty(forearm_frq_et.getText().toString())) {
             this.FOREARM_FRQ = Integer.parseInt(forearm_frq_et.getText().toString());
-            Toast.makeText(this , "forearm frq = " + FOREARM_FRQ , Toast.LENGTH_SHORT).show();
+            DataPoint[] dataPoint = new DataPoint[] {
+                    new DataPoint(FOREARM_FRQ / 1000 , 1000)
+            };
+            forearm_series.resetData(dataPoint);
+            graphView.addSeries(forearm_series);
         } else {}
+    }
+
+    public void generateData(int frq , BarGraphSeries<DataPoint> series) {
+        series.resetData(new DataPoint[]{
+                new DataPoint(frq , 1000)
+        });
     }
 
     // start recording button
