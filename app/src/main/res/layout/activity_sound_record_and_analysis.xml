@@ -19,7 +19,7 @@
         <com.jjoe64.graphview.GraphView
             android:id="@+id/frequency_spectrum"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="200dp"
             android:background="@color/white"/>
 
         <LinearLayout
@@ -51,12 +51,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/bicep_frq_et"
-                        android:hint="Frequency (Hz)"/>
+                        android:hint="Frequency (Hz)"
+                        android:textColorHint="@color/cyan"
+                        android:textColor="@color/cyan"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hz"/>
+                        android:text="Hz"
+                        android:textColor="@color/white"/>
 
                 </LinearLayout>
 
@@ -88,12 +91,15 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/triceps_frq_et"
-                        android:hint="Frequency (Hz)"/>
+                        android:hint="Frequency (Hz)"
+                        android:textColorHint="@color/yellow"
+                        android:textColor="@color/yellow"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hz"/>
+                        android:text="Hz"
+                        android:textColor="@color/white"/>
 
                 </LinearLayout>
 
@@ -125,18 +131,51 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:id="@+id/forearm_frq_et"
-                        android:hint="Frequency (Hz)"/>
+                        android:hint="Frequency (Hz)"
+                        android:textColorHint="@color/magenta"
+                        android:textColor="@color/magenta" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hz"/>
+                        android:text="Hz"
+                        android:textColor="@color/white"/>
 
                 </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/update_frq_btn"
+            android:text="Update Frequency"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="@color/button_clicked"
+            android:layout_gravity="center_horizontal"
+            android:onClick="updateFrequency"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/start_recording_btn"
+            android:text="Start Recording"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="@color/button_clicked"
+            android:layout_gravity="center_horizontal"
+            android:onClick="startRecording"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/replay_recording_btn"
+            android:text="Replay Recording"
+            style="?android:attr/borderlessButtonStyle"
+            android:textColor="@color/button_clicked"
+            android:layout_gravity="center_horizontal"
+            android:onClick="replayRecording"/>
 
         <ImageView
             android:layout_width="match_parent"
