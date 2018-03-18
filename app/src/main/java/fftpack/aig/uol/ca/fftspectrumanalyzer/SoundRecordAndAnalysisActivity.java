@@ -2,12 +2,18 @@ package fftpack.aig.uol.ca.fftspectrumanalyzer;
 
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,6 +31,9 @@ import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import FFTLibrary.RealDoubleFFT;
+import backend.FrequencyGraph;
+
 public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
     private GraphView graphView; // frequency spectrum
@@ -39,17 +48,33 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private Button update_frq_button;
     private Button replay_recording_button;
     private Button start_recording_button;
+    private FrequencyGraph frequencyGraph;
 
-    private LineGraphSeries<DataPoint> frq_series , min_series , max_series; // data for the graph
+    private LineGraphSeries<DataPoint> frq_series , min_series , max_series , sound_series; // data for the graph
     private BarGraphSeries<DataPoint> bicep_series , triceps_series , forearm_series;
     private double x_frq, y_frq , x_bicep , y_bicep , x_min , y_min , x_max , y_max; // x_frq and y_frq coordinates
     private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50;
+
+    private static final double[] CANCELLED = {100};
+    int frequency = 8000;/*44100;*/
+    int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+    int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+    AudioRecord audioRecord;
+    private RealDoubleFFT transformer;
+    int blockSize = /*2048;// = */256;
+    boolean started = false;
+    boolean CANCELLED_FLAG = false;
+    double[][] cancelledResult = {{100}};
+    int mPeakPos;
+    double mHighestFreq;
+    RecordAudio recordTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) { // when app in launched
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_record_and_analysis); // call the UI
         setUpVariables();
+        recordTask.execute();
         setUpGraph();
     }
 
@@ -61,13 +86,14 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         triceps_frq_et = (EditText) findViewById(R.id.triceps_frq_et);
         forearm_txtview = (TextView) findViewById(R.id.forearm_tv);
         forearm_frq_et = (EditText) findViewById(R.id.forearm_frq_et);
-        bitmap = (ImageView) findViewById(R.id.bitmap_iv);
+//        bitmap = (ImageView) findViewById(R.id.bitmap_iv);
         frq_series = new LineGraphSeries<DataPoint>();
         min_series = new LineGraphSeries<DataPoint>();
         max_series = new LineGraphSeries<DataPoint>();
         bicep_series = new BarGraphSeries<DataPoint>();
         triceps_series = new BarGraphSeries<DataPoint>();
         forearm_series = new BarGraphSeries<DataPoint>();
+        sound_series = new LineGraphSeries<DataPoint>();
         update_frq_button = (Button) findViewById(R.id.update_frq_btn);
         replay_recording_button = (Button) findViewById(R.id.replay_recording_btn);
         start_recording_button = (Button) findViewById(R.id.start_recording_btn);
@@ -75,6 +101,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
         triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
         forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
+        frequencyGraph = new FrequencyGraph(this);
+        frequencyGraph = (FrequencyGraph) findViewById(R.id.frequency_graph);
+        recordTask = new RecordAudio();
     }
 
     private void setUpGraph() {
@@ -216,5 +245,114 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
     // replay recording button
     public void replayRecording(View view) { // TODO: to be implemented
+    }
+
+    private class RecordAudio extends AsyncTask<Void , double[] , Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            int  bufferSize = AudioRecord.getMinBufferSize(frequency , channelConfiguration , audioEncoding);
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT , frequency , channelConfiguration , audioEncoding ,bufferSize);
+            int bufferReadResult;
+            short[] buffer = new short[blockSize];
+            double[] toTransform = new double[blockSize];
+            try {
+                audioRecord.startRecording();
+            } catch (IllegalStateException e) {
+                Log.e("Recording failed" , e.toString());
+            }
+            while (started) {
+                if(isCancelled() || (CANCELLED_FLAG == true)) {
+                    started = false;
+                    publishProgress(cancelledResult);
+                    Log.d("doInBackground" , "Cancelling the RecordTask");
+                    break;
+                }
+                else {
+                    bufferReadResult = audioRecord.read(buffer , 0 , blockSize);
+                    for (int i = 0 ; i < blockSize && i < bufferReadResult ; i++) {
+                        toTransform[i] = (double) buffer[i] / 32768.0; // signed 16 bit
+                    }
+
+                    transformer.ft(toTransform);
+                    publishProgress(toTransform);
+                }
+            }
+            return true;
+        }
+
+        @Override
+        protected void onProgressUpdate(double[]...progress) {
+            Log.e("RecordingProgress", "Displaying in progress");
+            double mMaxFFTSample = 150.0;
+
+            Log.d("Test:", Integer.toString(progress[0].length));
+            if(progress[0].length == 1 ) {
+                Log.d("FFTSpectrumAnalyzer", "onProgressUpdate: Blackening the screen");
+            }
+//            else {
+//                double x = 0.0 , y;
+//                for (int i = 0 ; i < progress[0].length ; i++) {
+//                    x = x + 0.1f;
+//                    y = progress[0][i] * 10;
+//                    sound_series.appendData(new DataPoint(x, y) , true , progress[0].length);
+//                }
+//                sound_series.setColor(Color.GREEN);
+//                graphView.addSeries(sound_series);
+//            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            super.onPostExecute(result);
+            try {
+                audioRecord.stop();
+            } catch (IllegalStateException e) {
+                Log.e("Stop failed", e.toString());
+            }
+        }
+    }
+
+    protected void onCancelled(Boolean result){
+        try{
+            audioRecord.stop();
+        } catch(IllegalStateException e){
+            Log.e("Stop failed", e.toString());
+        }
+        Log.d("FFTSpectrumAnalyzer","onCancelled: New Screen");
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+
+    }
+
+    public void onStop(){
+        super.onStop();
+        recordTask.cancel(true);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        recordTask.cancel(true);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        recordTask.cancel(true);
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
