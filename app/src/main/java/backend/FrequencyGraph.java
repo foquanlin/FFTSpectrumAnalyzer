@@ -21,7 +21,7 @@ import android.widget.ImageView;
 
 @SuppressLint("AppCompatCustomView")
 public class FrequencyGraph extends ImageView {
-    private Paint paintScale;
+    private Paint paintScale , paintAxis;
     private Bitmap bitmapScale;
     private Canvas canvasScale;
     private int width, height , width_bitmap , height_bitmap;
@@ -45,7 +45,7 @@ public class FrequencyGraph extends ImageView {
             displayM = this.getResources().getDisplayMetrics();
 //            width = displayM.widthPixels; // get screen width
 //            height = (displayM.heightPixels); // get screen height
-            bitmapScale = Bitmap.createBitmap(width, 400, Bitmap.Config.ARGB_8888);
+            bitmapScale = Bitmap.createBitmap(width, 500, Bitmap.Config.ARGB_8888);
             width_bitmap = bitmapScale.getWidth();
             height_bitmap = bitmapScale.getHeight();
             xmax = width_bitmap;
@@ -53,12 +53,16 @@ public class FrequencyGraph extends ImageView {
             xmin = 0;
             ymin = 0;
             paintScale = new Paint();
-            paintScale.setColor(Color.BLACK);
+            paintScale.setColor(Color.GRAY);
             paintScale.setStyle(Paint.Style.FILL);
+            paintAxis = new Paint();
+            paintAxis.setColor(Color.BLACK);
+            paintAxis.setStyle(Paint.Style.FILL);
+            paintAxis.setStrokeWidth(5);
             canvasScale = new Canvas(bitmapScale);
 //            canvasScale.scale(width_bitmap / (xmax - xmin), -height_bitmap / (ymax - ymin));
 //            canvasScale.translate(-xmin, -ymax);
-            canvasScale.drawColor(Color.RED);
+            canvasScale.drawColor(Color.WHITE);
             setImageBitmap(bitmapScale);
             invalidate();
         }
@@ -76,8 +80,8 @@ public class FrequencyGraph extends ImageView {
         int linesSmallWidth = width / 21;
         int linesBigHeight = height / 21;
         int linesSmallHeight = height / 21;
-        canvasScale.drawLine(80, height_bitmap - 40, width, height_bitmap - 40, paintScale);
-        canvasScale.drawLine(80 , height_bitmap - 40 , 80 , 0 ,paintScale);
+        canvasScale.drawLine(80, height_bitmap - 40, width, height_bitmap - 40, paintAxis);
+        canvasScale.drawLine(80 , height_bitmap - 40 , 80 , 0 ,paintAxis);
         for (int i = 80, j = 0; i < width; i = i + linesBigWidth, j++) {
             for (int k = i; k < (i + linesBigWidth); k = k + linesSmallWidth) {
                 canvasScale.drawLine(k, height_bitmap - 40, k, height_bitmap - 35, paintScale);
@@ -85,6 +89,7 @@ public class FrequencyGraph extends ImageView {
             canvasScale.drawLine(i, height_bitmap - 40, i, height_bitmap - 25, paintScale);
             String text = Integer.toString(j) + " ";
             if (j % 5 == 0) {
+                canvasScale.drawLine(i, height_bitmap - 40, i, 0, paintScale);
                 float textSize = paintScale.getTextSize();
                 paintScale.setTextSize(textSize * 2.1f);
                 float x = i;
@@ -101,9 +106,10 @@ public class FrequencyGraph extends ImageView {
             for (int k = i; k < (i + linesBigHeight); k = k + linesSmallHeight) {
                 canvasScale.drawLine(80, height_bitmap - k, 65, height_bitmap - k, paintScale);
             }
-            canvasScale.drawLine(80, i, 75 , i, paintScale);
+//            canvasScale.drawLine(80, i, 75 , i, paintScale);
             String text = Integer.toString(j * 40) + " ";
             if (j % 5 == 0) {
+                canvasScale.drawLine(80 , height_bitmap - i , width , height_bitmap - i , paintScale);
                 float textSize = paintScale.getTextSize();
                 paintScale.setTextSize(textSize * 2.1f);
                 float y = height_bitmap - i;

@@ -185,13 +185,13 @@
 
         <backend.FrequencyGraph
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="500px"
             android:background="@color/white"
             android:id="@+id/frequency_graph"/>
 
-        <backend.HorizontalScaleImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        <!--<backend.HorizontalScaleImageView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"/>-->
 
         <Space
             android:layout_width="wrap_content"
