@@ -183,11 +183,17 @@
             <!--android:id="@+id/bitmap_iv"-->
             <!--android:background="@color/white"/>-->
 
-        <backend.FrequencyGraph
+        <!--<backend.FrequencyGraph-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="500px"-->
+            <!--android:background="@color/white"-->
+            <!--android:id="@+id/frequency_graph"/>-->
+
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="500px"
-            android:background="@color/white"
-            android:id="@+id/frequency_graph"/>
+            android:id="@+id/spectrum_imageview"
+            android:background="@color/white"/>
 
         <!--<backend.HorizontalScaleImageView-->
             <!--android:layout_width="match_parent"-->

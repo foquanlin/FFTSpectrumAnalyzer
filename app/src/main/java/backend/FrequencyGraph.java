@@ -39,6 +39,7 @@ public class FrequencyGraph extends ImageView {
     public FrequencyGraph(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+    
 
     private void init() {
         if (!isInEditMode()) {

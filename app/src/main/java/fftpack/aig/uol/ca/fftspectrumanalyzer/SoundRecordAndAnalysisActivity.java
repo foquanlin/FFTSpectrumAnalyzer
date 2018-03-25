@@ -1,23 +1,32 @@
 package fftpack.aig.uol.ca.fftspectrumanalyzer;
 
-import android.app.Fragment;
-import android.app.ProgressDialog;
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
+import android.os.Environment;
+import android.os.SystemClock;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,6 +39,15 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.ByteBuffer;
 
 import FFTLibrary.RealDoubleFFT;
 import backend.FrequencyGraph;
@@ -45,28 +63,24 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private EditText forearm_frq_et; // forearm frequency edit text
     private ImageView bitmap; // bitmap image
     private Display display; // display of device
+    private Point size;
     private Button update_frq_button;
     private Button replay_recording_button;
     private Button start_recording_button;
-    private FrequencyGraph frequencyGraph;
+//    private FrequencyGraph frequencyGraph;
+    private ImageView spectrum;
+    private Paint paintScale , paintAxis , paintSpectrumDisplay;
+    private Bitmap bitmapScale;
+    private Canvas canvasScale;
+    private int width, height, width_bitmap , height_bitmap;
+//    private DisplayMetrics displayM;
+    private float xmax , xmin , ymax , ymin;
 
     private LineGraphSeries<DataPoint> frq_series , min_series , max_series , sound_series; // data for the graph
     private BarGraphSeries<DataPoint> bicep_series , triceps_series , forearm_series;
     private double x_frq, y_frq , x_bicep , y_bicep , x_min , y_min , x_max , y_max; // x_frq and y_frq coordinates
     private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50;
 
-    private static final double[] CANCELLED = {100};
-    int frequency = 8000;/*44100;*/
-    int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-    int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
-    AudioRecord audioRecord;
-    private RealDoubleFFT transformer;
-    int blockSize = /*2048;// = */256;
-    boolean started = false;
-    boolean CANCELLED_FLAG = false;
-    double[][] cancelledResult = {{100}};
-    int mPeakPos;
-    double mHighestFreq;
     RecordAudio recordTask;
 
     @Override
@@ -74,7 +88,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_record_and_analysis); // call the UI
         setUpVariables();
-        recordTask.execute();
         setUpGraph();
     }
 
@@ -86,6 +99,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         triceps_frq_et = (EditText) findViewById(R.id.triceps_frq_et);
         forearm_txtview = (TextView) findViewById(R.id.forearm_tv);
         forearm_frq_et = (EditText) findViewById(R.id.forearm_frq_et);
+        int tricep_width = triceps_txtview.getWidth();
 //        bitmap = (ImageView) findViewById(R.id.bitmap_iv);
         frq_series = new LineGraphSeries<DataPoint>();
         min_series = new LineGraphSeries<DataPoint>();
@@ -101,9 +115,16 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
         triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
         forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
-        frequencyGraph = new FrequencyGraph(this);
-        frequencyGraph = (FrequencyGraph) findViewById(R.id.frequency_graph);
-        recordTask = new RecordAudio();
+//        frequencyGraph = new FrequencyGraph(this);
+//        frequencyGraph = (FrequencyGraph) findViewById(R.id.frequency_graph);
+        spectrum = (ImageView) findViewById(R.id.spectrum_imageview);
+        display = getWindowManager().getDefaultDisplay();
+        width = display.getWidth();
+        height = display.getHeight() / 4;
+//        displayM = new DisplayMetrics();
+//        getWindowManager().getDefaultDisplay().getMetrics(displayM);
+//        width = displayM.widthPixels;
+//        height = displayM.heightPixels / 4;
     }
 
     private void setUpGraph() {
@@ -245,16 +266,200 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
     // replay recording button
     public void replayRecording(View view) { // TODO: to be implemented
+        Snackbar.make(view, "Feature still not implemented", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show();
     }
 
     private class RecordAudio extends AsyncTask<Void , double[] , Boolean> {
+        private ImageView spectrum;
+        private Paint paintScale , paintAxis, paintSpectrumDisplay;
+        private Bitmap bitmapScale;
+        private Canvas canvasScale;
+        private int width, height, width_bitmap , height_bitmap;
+        private RealDoubleFFT transformer;
+        private AudioRecord audioRecord;
+        private DisplayMetrics displayM;
+        private float xmax , xmin , ymax , ymin;
+
+        private final double[] CANCELLED = {100};
+        int blockSize = /*2048;// = */256;
+        boolean started = false;
+        boolean CANCELLED_FLAG = false;
+        double[][] cancelledResult = {{100}};
+        int mPeakPos;
+        double mHighestFreq;
+        private double[] real , imaginary , magnitude , frequency;
+        int sampleRate = 44100;
+
+        public final static String IO_FILENAME= "KISDataREC";
+        public FileOutputStream fOut;
+        public FileInputStream fIn;
+        public File file;
+        public InputStreamReader myInReader;
+        public OutputStreamWriter myOutWriter;
+        public boolean isRecording=false , wasRecording=false , wasRepaying= false , isReplaying=false;
+
+
+        public RecordAudio(ImageView spectrum, Paint paintScale, Paint paintAxis, Paint paintSpectrumDisplay , Bitmap bitmapScale, Canvas canvasScale, int width_bitmap, int height_bitmap, float xmax, float xmin, float ymax, float ymin, int width , int height) {
+            this.spectrum = spectrum;
+            this.paintScale = paintScale;
+            this.paintAxis = paintAxis;
+            this.paintSpectrumDisplay = paintSpectrumDisplay;
+            this.bitmapScale = bitmapScale;
+            this.canvasScale = canvasScale;
+            this.width_bitmap = width_bitmap;
+            this.height_bitmap = height_bitmap;
+            this.xmax = xmax;
+            this.xmin = xmin;
+            this.ymax = ymax;
+            this.ymin = ymin;
+            this.width = width;
+            this.height = height;
+
+        }
+
+        public void setUpSpectrum() {
+
+            spectrum.setLayoutParams(new LinearLayout.LayoutParams(width , height));
+            bitmapScale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            width_bitmap = bitmapScale.getWidth();
+            height_bitmap = bitmapScale.getHeight();
+            xmax = width_bitmap;
+            ymax = height_bitmap;
+            xmin = 0;
+            ymin = 0;
+            paintScale = new Paint();
+            paintScale.setColor(Color.GRAY);
+            paintScale.setStyle(Paint.Style.FILL);
+            paintAxis = new Paint();
+            paintAxis.setColor(Color.BLACK);
+            paintAxis.setStyle(Paint.Style.FILL);
+            paintAxis.setStrokeWidth(5);
+            paintSpectrumDisplay = new Paint();
+            paintSpectrumDisplay.setColor(Color.GREEN); //color of the spectrum
+            paintSpectrumDisplay.setStrokeWidth(5f);
+            canvasScale = new Canvas(bitmapScale);
+            canvasScale.drawColor(Color.WHITE);
+            spectrum.setImageBitmap(bitmapScale);
+            spectrum.invalidate();
+
+            if (canvasScale == null) {
+                return;
+            }
+
+            int linesBigWidth = width / 21;
+            int linesSmallWidth = width / 21;
+            int linesBigHeight = height / 21;
+            int linesSmallHeight = height / 21;
+            canvasScale.drawLine(80, height_bitmap - 40, width, height_bitmap - 40, paintAxis);
+            canvasScale.drawLine(80 , height_bitmap - 40 , 80 , 0 ,paintAxis);
+            for (int i = 80, j = 0; i < width; i = i + linesBigWidth, j++) {
+                for (int k = i; k < (i + linesBigWidth); k = k + linesSmallWidth) {
+                    canvasScale.drawLine(k, height_bitmap - 40, k, height_bitmap - 35, paintScale);
+                }
+                canvasScale.drawLine(i, height_bitmap - 40, i, height_bitmap - 25, paintScale);
+                String text = Integer.toString(j) + " ";
+                if (j % 5 == 0) {
+                    canvasScale.drawLine(i, height_bitmap - 40, i, 0, paintScale);
+                    float textSize = paintScale.getTextSize();
+                    paintScale.setTextSize(textSize * 2.1f);
+                    float x = i;
+                    float w = 31.5f;
+                    if (i != 0) x -= 12.5f;
+                    if (i < 10 * linesBigWidth) w = 17.5f;
+                    canvasScale.drawText(text, x, height_bitmap - 5, paintScale);
+                    paintScale.setTextSize(textSize * 1.3f);
+                    canvasScale.drawText("kHz", x + w, height_bitmap - 5, paintScale);
+                    paintScale.setTextSize(textSize);
+                }
+            }
+            for (int i = 40, j = 0; i < height; i = i + linesBigHeight, j++) {
+                for (int k = i; k < (i + linesBigHeight); k = k + linesSmallHeight) {
+                    canvasScale.drawLine(80, height_bitmap - k, 65, height_bitmap - k, paintScale);
+                }
+//            canvasScale.drawLine(80, i, 75 , i, paintScale);
+                String text = Integer.toString(j * 40) + " ";
+                if (j % 5 == 0) {
+                    canvasScale.drawLine(80 , height_bitmap - i , width , height_bitmap - i , paintScale);
+                    float textSize = paintScale.getTextSize();
+                    paintScale.setTextSize(textSize * 2.1f);
+                    float y = height_bitmap - i;
+                    float w = 41.5f;
+                    if (i != 0) y += 12.5f;
+                    if (i < 10 * linesBigHeight) w = 37.5f;
+                    canvasScale.drawText(text, 5, y, paintScale);
+                    paintScale.setTextSize(textSize * 1.3f);
+                    canvasScale.drawText("dB", 5 + w, y, paintScale);
+                    paintScale.setTextSize(textSize);
+                }
+            }
+        }
+
+        private double[] freqMagnitude(double [] toTransform) {
+            real = new double[blockSize];
+            imaginary = new double[blockSize];
+            magnitude = new double[blockSize / 2];
+            frequency = new double[blockSize / 2];
+
+            for (int i = 0 ; i < blockSize / 2 ; i++) {
+                real[i] = toTransform[i * 2];
+                imaginary[i] = toTransform[(i * 2) + 1];
+            }
+
+            for (int i = 0 ; i < blockSize / 2 ; i++) {
+                magnitude[i] = 0.7 * (Math.sqrt((real[i] * real[i]) + (imaginary[i] * imaginary[i]))); // magnitude is calculated by the square root of (imaginary^2 + real^2)
+                frequency[i] = i * (sampleRate) / (blockSize); // calculated the frequency
+            }
+
+            return magnitude;
+        }
+
+        public File init_writeFile(){
+            final File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/KIS/"); // Get the directory for the user's public pictures directory.
+            if(!path.exists()) { // Make sure the path directory exists.
+                path.mkdirs(); // Make it, if it doesn't exit
+            }
+            File file = new File(path, RecordAudio.IO_FILENAME);
+            return file;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            transformer = new RealDoubleFFT(blockSize);
+        }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            int  bufferSize = AudioRecord.getMinBufferSize(frequency , channelConfiguration , audioEncoding);
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT , frequency , channelConfiguration , audioEncoding ,bufferSize);
-            int bufferReadResult;
+            Log.d("Recording doBackground", voids.toString());
+            file = init_writeFile(); // initiation of file writing
+            try {
+                if(!file.exists()) // check if file doesn't exist
+                    file.createNewFile(); // create a new file
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                fOut = new FileOutputStream(file); // output file
+                myOutWriter = new OutputStreamWriter(fOut); // output writer?
+
+                fIn = new FileInputStream(file); // input file
+                myInReader = new InputStreamReader(fIn); // input reader?
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
+            int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+            int  bufferSize = AudioRecord.getMinBufferSize(sampleRate , channelConfiguration , audioEncoding);
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT , sampleRate , channelConfiguration , audioEncoding ,bufferSize);
+            int state = audioRecord.getState();
+            int bufferReadResult = 0;
+            int counter = 0;
+            long total=0;
+            boolean run = true;
             short[] buffer = new short[blockSize];
+            byte[] buff = new byte[2 * blockSize];
             double[] toTransform = new double[blockSize];
             try {
                 audioRecord.startRecording();
@@ -269,13 +474,77 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                     break;
                 }
                 else {
-                    bufferReadResult = audioRecord.read(buffer , 0 , blockSize);
+                    if(!isReplaying) {
+                        bufferReadResult = audioRecord.read(buffer , 0 , blockSize);
+                        if (isRecording) { // if is recording
+                            ByteBuffer.wrap(buff).asShortBuffer().put(buffer); // write to buffer?
+                            wasRecording = true;
+                            try {
+
+                                if (total + bufferReadResult > 4294967295L) { // Write as many bytes as we can before hitting the max size
+                                    for (int i = 0; i < bufferReadResult && total <= 4294967295L; i++, total++) {
+                                        fOut.write(buff[i]);
+                                    }
+                                    isRecording = false; // is recording is false because file limit is reached
+                                    Log.v("File ", "hit file limit");
+                                } else {
+                                    fOut.write(buff, 0, bufferReadResult); // Write out the entire read buffer
+                                }
+                                total += bufferReadResult;
+
+                            } catch (IOException ex) {
+                            } finally { //return new Object[]{ex};
+                                if (!isRecording && wasRecording && fOut != null)
+                                    try {
+                                        fOut.close();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                            }
+                        }
+                    }
+                    else if(isReplaying) {
+                    SystemClock.sleep(75);
+                    try {
+                        fIn = new FileInputStream(file);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        if (total <= buff.length) { //if short record
+                            fIn.read(buff, 0, (int) total);
+                            bufferReadResult = (int) total;
+                            isReplaying = false;
+                        } else { //if long record
+                            if (counter < 10) {
+                                fIn.read(buff, counter * buff.length, buff.length);
+                                counter++;
+                            }else
+                            if (counter == blockSize-1) {
+                                fIn.read(buff, counter * buff.length, (int) (total - buff.length * counter));
+                                counter = 0;
+                                isReplaying = false;
+                            }
+                            bufferReadResult = blockSize;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }finally {
+                        if (!isReplaying && wasRepaying && fIn != null)
+                            try {
+                                fIn.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                    }
+                    ByteBuffer.wrap(buff).asShortBuffer().get(buffer);
+                }
                     for (int i = 0 ; i < blockSize && i < bufferReadResult ; i++) {
                         toTransform[i] = (double) buffer[i] / 32768.0; // signed 16 bit
                     }
 
                     transformer.ft(toTransform);
-                    publishProgress(toTransform);
+                    publishProgress(freqMagnitude(toTransform));
                 }
             }
             return true;
@@ -285,20 +554,18 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         protected void onProgressUpdate(double[]...progress) {
             Log.e("RecordingProgress", "Displaying in progress");
             double mMaxFFTSample = 150.0;
-
             Log.d("Test:", Integer.toString(progress[0].length));
-            if(progress[0].length == 1 ) {
-                Log.d("FFTSpectrumAnalyzer", "onProgressUpdate: Blackening the screen");
-            }
+//            if(progress[0].length == 1 ) {
+//                Log.d("FFTSpectrumAnalyzer", "onProgressUpdate: Blackening the screen");
+//            }
 //            else {
-//                double x = 0.0 , y;
-//                for (int i = 0 ; i < progress[0].length ; i++) {
-//                    x = x + 0.1f;
-//                    y = progress[0][i] * 10;
-//                    sound_series.appendData(new DataPoint(x, y) , true , progress[0].length);
-//                }
-//                sound_series.setColor(Color.GREEN);
-//                graphView.addSeries(sound_series);
+                for (int i = 0 ; i < progress[0].length ; i++) {
+                    int fs = 4 * i;
+                    int lower = (int) (height - progress[0][i] * 10);
+                    int upper = height;
+                    canvasScale.drawLine(fs, lower, fs+4, upper , paintSpectrumDisplay);
+                }
+                spectrum.invalidate();
 //            }
         }
 
@@ -313,46 +580,11 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         }
     }
 
-    protected void onCancelled(Boolean result){
-        try{
-            audioRecord.stop();
-        } catch(IllegalStateException e){
-            Log.e("Stop failed", e.toString());
-        }
-        Log.d("FFTSpectrumAnalyzer","onCancelled: New Screen");
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-
-    }
-
-    public void onStop(){
-        super.onStop();
-        recordTask.cancel(true);
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        recordTask.cancel(true);
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        recordTask.cancel(true);
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+    public void onStart() {
+        super.onStart();
+        recordTask = new RecordAudio(spectrum , paintScale , paintAxis , paintSpectrumDisplay , bitmapScale , canvasScale , width_bitmap , height_bitmap , xmax , xmin , ymax , ymin , width , height);
+        recordTask.setUpSpectrum();
+        recordTask.execute();
     }
 }
