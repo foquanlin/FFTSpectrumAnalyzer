@@ -177,18 +177,6 @@
             android:layout_gravity="center_horizontal"
             android:onClick="replayRecording"/>
 
-        <!--<ImageView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="100dp"-->
-            <!--android:id="@+id/bitmap_iv"-->
-            <!--android:background="@color/white"/>-->
-
-        <!--<backend.FrequencyGraph-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="500px"-->
-            <!--android:background="@color/white"-->
-            <!--android:id="@+id/frequency_graph"/>-->
-
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="500px"

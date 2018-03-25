@@ -99,7 +99,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         triceps_frq_et = (EditText) findViewById(R.id.triceps_frq_et);
         forearm_txtview = (TextView) findViewById(R.id.forearm_tv);
         forearm_frq_et = (EditText) findViewById(R.id.forearm_frq_et);
-        int tricep_width = triceps_txtview.getWidth();
 //        bitmap = (ImageView) findViewById(R.id.bitmap_iv);
         frq_series = new LineGraphSeries<DataPoint>();
         min_series = new LineGraphSeries<DataPoint>();
@@ -115,16 +114,10 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
         triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
         forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
-//        frequencyGraph = new FrequencyGraph(this);
-//        frequencyGraph = (FrequencyGraph) findViewById(R.id.frequency_graph);
         spectrum = (ImageView) findViewById(R.id.spectrum_imageview);
         display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
         height = display.getHeight() / 4;
-//        displayM = new DisplayMetrics();
-//        getWindowManager().getDefaultDisplay().getMetrics(displayM);
-//        width = displayM.widthPixels;
-//        height = displayM.heightPixels / 4;
     }
 
     private void setUpGraph() {
@@ -290,6 +283,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         double mHighestFreq;
         private double[] real , imaginary , magnitude , frequency;
         int sampleRate = 44100;
+        int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
+        int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
         public final static String IO_FILENAME= "KISDataREC";
         public FileOutputStream fOut;
@@ -449,14 +444,12 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
-            int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
             int  bufferSize = AudioRecord.getMinBufferSize(sampleRate , channelConfiguration , audioEncoding);
-            audioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT , sampleRate , channelConfiguration , audioEncoding ,bufferSize);
+            audioRecord = new AudioRecord(MediaRecorder.AudioSource.DEFAULT , sampleRate , channelConfiguration , audioEncoding , bufferSize);
             int state = audioRecord.getState();
             int bufferReadResult = 0;
             int counter = 0;
-            long total=0;
+            long total = 0;
             boolean run = true;
             short[] buffer = new short[blockSize];
             byte[] buff = new byte[2 * blockSize];
