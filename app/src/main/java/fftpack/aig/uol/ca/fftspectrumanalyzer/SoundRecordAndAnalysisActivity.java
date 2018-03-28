@@ -52,6 +52,9 @@ import java.nio.ByteBuffer;
 import FFTLibrary.RealDoubleFFT;
 import backend.FrequencyGraph;
 
+import static android.graphics.Paint.Style.FILL;
+import static android.graphics.Paint.Style.FILL_AND_STROKE;
+
 public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
     private GraphView graphView; // frequency spectrum
@@ -69,7 +72,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private Button start_recording_button;
 //    private FrequencyGraph frequencyGraph;
     private ImageView spectrum;
-    private Paint paintScale , paintAxis , paintSpectrumDisplay;
+    private Paint paintScale , paintAxis , paintSpectrumDisplay , paintBicep , paintTricep , paintForearm;
     private Bitmap bitmapScale;
     private Canvas canvasScale;
     private int width, height, width_bitmap , height_bitmap;
@@ -88,6 +91,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_record_and_analysis); // call the UI
         setUpVariables();
+        requestRecordAudioPermission();
         setUpGraph();
     }
 
@@ -263,6 +267,56 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                 .setAction("Action", null).show();
     }
 
+    private void requestRecordAudioPermission() {
+        //check API version, do nothing if API version < 23!
+        int currentApiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentApiVersion > android.os.Build.VERSION_CODES.LOLLIPOP){
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
+
+                    // Show an expanation to the user *asynchronously* -- don't block
+                    // this thread waiting for the user's response! After the user
+                    // sees the explanation, try again to request the permission.
+
+                } else {
+
+                    // No explanation needed, we can request the permission.
+
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    Log.d("Activity", "Granted!");
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d("Activity", "Denied!");
+                    finish();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
     private class RecordAudio extends AsyncTask<Void , double[] , Boolean> {
         private ImageView spectrum;
         private Paint paintScale , paintAxis, paintSpectrumDisplay;
@@ -292,7 +346,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         public File file;
         public InputStreamReader myInReader;
         public OutputStreamWriter myOutWriter;
-        public boolean isRecording=false , wasRecording=false , wasRepaying= false , isReplaying=false;
+        public boolean isRecording = false , wasRecording = false , wasRepaying = false , isReplaying = false;
 
 
         public RecordAudio(ImageView spectrum, Paint paintScale, Paint paintAxis, Paint paintSpectrumDisplay , Bitmap bitmapScale, Canvas canvasScale, int width_bitmap, int height_bitmap, float xmax, float xmin, float ymax, float ymin, int width , int height) {
@@ -325,14 +379,27 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             ymin = 0;
             paintScale = new Paint();
             paintScale.setColor(Color.GRAY);
-            paintScale.setStyle(Paint.Style.FILL);
+            paintScale.setStyle(FILL);
             paintAxis = new Paint();
             paintAxis.setColor(Color.BLACK);
-            paintAxis.setStyle(Paint.Style.FILL);
+            paintAxis.setStyle(FILL);
             paintAxis.setStrokeWidth(5);
             paintSpectrumDisplay = new Paint();
             paintSpectrumDisplay.setColor(Color.GREEN); //color of the spectrum
-            paintSpectrumDisplay.setStrokeWidth(5f);
+            paintSpectrumDisplay.setStyle(FILL_AND_STROKE);
+            paintSpectrumDisplay.setStrokeWidth(12f);
+            paintBicep = new Paint();
+            paintBicep.setColor(Color.CYAN);
+            paintBicep.setStyle(FILL_AND_STROKE);
+            paintBicep.setStrokeWidth(3);
+            paintTricep = new Paint();
+            paintTricep.setColor(Color.YELLOW);
+            paintTricep.setStyle(FILL_AND_STROKE);
+            paintTricep.setStrokeWidth(3);
+            paintForearm = new Paint();
+            paintForearm.setColor(Color.MAGENTA);
+            paintForearm.setStyle(FILL_AND_STROKE);
+            paintForearm.setStrokeWidth(3);
             canvasScale = new Canvas(bitmapScale);
             canvasScale.drawColor(Color.WHITE);
             spectrum.setImageBitmap(bitmapScale);
@@ -342,10 +409,10 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                 return;
             }
 
-            int linesBigWidth = width / 21;
-            int linesSmallWidth = width / 21;
-            int linesBigHeight = height / 21;
-            int linesSmallHeight = height / 21;
+            int linesBigWidth = (width - 80) / 21;
+            int linesSmallWidth = (width - 80) / 21;
+            int linesBigHeight = (height - 40) / 21;
+            int linesSmallHeight = (height - 40) / 21;
             canvasScale.drawLine(80, height_bitmap - 40, width, height_bitmap - 40, paintAxis);
             canvasScale.drawLine(80 , height_bitmap - 40 , 80 , 0 ,paintAxis);
             for (int i = 80, j = 0; i < width; i = i + linesBigWidth, j++) {
@@ -456,13 +523,14 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             double[] toTransform = new double[blockSize];
             try {
                 audioRecord.startRecording();
+                started = true;
             } catch (IllegalStateException e) {
                 Log.e("Recording failed" , e.toString());
             }
             while (started) {
                 if(isCancelled() || (CANCELLED_FLAG == true)) {
                     started = false;
-                    publishProgress(cancelledResult);
+//                    publishProgress(cancelledResult);
                     Log.d("doInBackground" , "Cancelling the RecordTask");
                     break;
                 }
@@ -473,7 +541,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                             ByteBuffer.wrap(buff).asShortBuffer().put(buffer); // write to buffer?
                             wasRecording = true;
                             try {
-
                                 if (total + bufferReadResult > 4294967295L) { // Write as many bytes as we can before hitting the max size
                                     for (int i = 0; i < bufferReadResult && total <= 4294967295L; i++, total++) {
                                         fOut.write(buff[i]);
@@ -546,20 +613,30 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(double[]...progress) {
             Log.e("RecordingProgress", "Displaying in progress");
+            canvasScale.drawColor(Color.WHITE);
+            setUpSpectrum();
             double mMaxFFTSample = 150.0;
             Log.d("Test:", Integer.toString(progress[0].length));
-//            if(progress[0].length == 1 ) {
-//                Log.d("FFTSpectrumAnalyzer", "onProgressUpdate: Blackening the screen");
-//            }
-//            else {
-                for (int i = 0 ; i < progress[0].length ; i++) {
-                    int fs = 4 * i;
-                    int lower = (int) (height - progress[0][i] * 10);
-                    int upper = height;
-                    canvasScale.drawLine(fs, lower, fs+4, upper , paintSpectrumDisplay);
-                }
-                spectrum.invalidate();
-//            }
+
+            int lower = 1;
+            int upper = 1;
+            double freqGap = (((double) sampleRate) / ((double) blockSize));
+            int line_position_Bicep = 12 * (Math.round((float)((double) BICEP_FRQ / freqGap))) + 80; // line indicating bicep frequency
+            int line_position_Triceps = 12 * (Math.round((float)((double)TRICEPS_FRQ / freqGap))) + 80; // line indicating triceps frequency
+            int line_position_Forearm = 12 * (Math.round((float)((double) FOREARM_FRQ / freqGap))) + 80; // line indicating forearm frequency
+
+            for (int i = 0 ; i < progress[0].length ; i++) {
+                    int fs = 12 * i + 80;
+                    lower = (int) ((height - 40) - progress[0][i] * 10);
+                    upper = height - 40;
+                    canvasScale.drawLine(fs, lower, fs, upper , paintSpectrumDisplay);
+            }
+            canvasScale.drawLine(line_position_Bicep , height_bitmap - 40 , line_position_Bicep , 0 , paintBicep);
+            canvasScale.drawLine(line_position_Triceps , height_bitmap - 40 , line_position_Triceps , 0 , paintTricep);
+            canvasScale.drawLine(line_position_Forearm , height_bitmap - 40 , line_position_Forearm , 0 , paintForearm);
+
+
+            spectrum.invalidate();
         }
 
         @Override
