@@ -201,8 +201,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="34dp"
-                android:rotation="168"
-                tools:background="@color/green" />
+                android:rotation="168"/>
 
             <ImageView
                 android:id="@+id/tricep_iv"
@@ -211,8 +210,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_alignTop="@+id/bicep_iv"
                 android:layout_marginStart="361dp"
-                android:rotation="168"
-                tools:background="@color/green" />
+                android:rotation="168" />
 
             <ImageView
                 android:id="@+id/forearm_iv"
@@ -222,8 +220,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginEnd="307dp"
                 android:layout_marginTop="110dp"
-                android:rotation="100"
-                tools:background="@color/green" />
+                android:rotation="100" />
 
         </RelativeLayout>
 

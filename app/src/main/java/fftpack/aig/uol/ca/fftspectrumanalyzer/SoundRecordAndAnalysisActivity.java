@@ -82,7 +82,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private LineGraphSeries<DataPoint> min_series , max_series , sound_series; // data for the graph
     private BarGraphSeries<DataPoint> bicep_series , triceps_series , forearm_series;
     private double x_frq, y_frq , x_bicep , y_bicep , x_min , y_min , x_max , y_max; // x_frq and y_frq coordinates
-    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50;
+    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50 , margin = 200;
 
     RecordAudio recordTask;
 
@@ -262,6 +262,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
         DataPoint[] dataPoints;
         private Runnable mTimer;
+        private boolean bicepActive , tricepActive , forearmActive;
+        private int THRESHOLD = 10;
 
 
         public final static String IO_FILENAME= "KISDataREC";
@@ -289,6 +291,10 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             this.width = width;
             this.height = height;
 
+            bicepActive = false;
+            tricepActive = false;
+            forearmActive = false;
+
         }
 
         private DataPoint[] generateData(double[][] progress) {
@@ -299,6 +305,13 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                 double y = progress[0][i] * 10;
                 DataPoint v = new DataPoint(x , y);
                 values[i] = v;
+                if (magnitude[i] > THRESHOLD) {
+                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
+                        bicepActive = true;
+                        canvas_bicep.drawColor(Color.RED);
+                    }
+                }
+
             }
             return values;
         }
