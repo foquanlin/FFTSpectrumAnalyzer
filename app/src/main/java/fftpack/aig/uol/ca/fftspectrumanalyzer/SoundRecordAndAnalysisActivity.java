@@ -355,7 +355,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                 public String formatLabel(double value , boolean isValueX) {
                     if (isValueX) {
                         // show normal x_frq values
-                        return super.formatLabel(value, isValueX) + "kHz";
+                        return super.formatLabel(value, isValueX) + "Hz";
                     } else {
                         // show currency for y_frq values
                         return super.formatLabel(value, isValueX) + "dB";
