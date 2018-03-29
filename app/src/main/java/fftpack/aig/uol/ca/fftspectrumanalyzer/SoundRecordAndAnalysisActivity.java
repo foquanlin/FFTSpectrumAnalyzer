@@ -82,7 +82,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private LineGraphSeries<DataPoint> min_series , max_series , sound_series; // data for the graph
     private BarGraphSeries<DataPoint> bicep_series , triceps_series , forearm_series;
     private double x_frq, y_frq , x_bicep , y_bicep , x_min , y_min , x_max , y_max; // x_frq and y_frq coordinates
-    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 400 , MIN_MAGNITUDE = 50 , margin = 200;
+    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 90 , MIN_MAGNITUDE = 10 , margin = 200;
 
     RecordAudio recordTask;
 
@@ -143,7 +143,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
             bicep_frq_et.setText("");
             DataPoint[] dataPoint = new DataPoint[] {
-                    new DataPoint(BICEP_FRQ / 1000 , 1000)
+                    new DataPoint(BICEP_FRQ , 1000)
             };
             bicep_series.resetData(dataPoint);
             graphView.addSeries(bicep_series);
@@ -153,7 +153,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
             triceps_frq_et.setText("");
             DataPoint[] dataPoint = new DataPoint[] {
-                    new DataPoint(TRICEPS_FRQ / 1000 , 1000)
+                    new DataPoint(TRICEPS_FRQ , 1000)
             };
             triceps_series.resetData(dataPoint);
             graphView.addSeries(triceps_series);
@@ -163,7 +163,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
             forearm_frq_et.setText("");
             DataPoint[] dataPoint = new DataPoint[] {
-                    new DataPoint(FOREARM_FRQ / 1000 , 1000)
+                    new DataPoint(FOREARM_FRQ , 1000)
             };
             forearm_series.resetData(dataPoint);
             graphView.addSeries(forearm_series);
@@ -301,17 +301,39 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             int count = 128;
             DataPoint[] values = new DataPoint[count];
             for(int i = 0 ; i < count ; i++) {
-                double x = i;
-                double y = progress[0][i] * 10;
+                double x = (21000 / 128) * i;
+                double y = progress[0][i];
                 DataPoint v = new DataPoint(x , y);
                 values[i] = v;
+                canvas_bicep.drawColor(Color.GREEN);
+                canvas_tricep.drawColor(Color.GREEN);
+                canvas_forearm.drawColor(Color.GREEN);
                 if (magnitude[i] > THRESHOLD) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = true;
                         canvas_bicep.drawColor(Color.RED);
                     }
+                    else {
+                        bicepActive = false;
+                        canvas_bicep.drawColor(Color.GREEN);
+                    }
+                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
+                        tricepActive = true;
+                        canvas_tricep.drawColor(Color.RED);
+                    }
+                    else {
+                        tricepActive = false;
+                        canvas_tricep.drawColor(Color.GREEN);
+                    }
+                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
+                        forearmActive = true;
+                        canvas_forearm.drawColor(Color.RED);
+                    }
+                    else {
+                        forearmActive = false;
+                        canvas_forearm.drawColor(Color.GREEN);
+                    }
                 }
-
             }
             return values;
         }
@@ -342,34 +364,34 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             });
             graphView.getViewport().setXAxisBoundsManual(true); // set range of x-axis
             graphView.getViewport().setMinX(0.0);
-            graphView.getViewport().setMaxX(21);
+            graphView.getViewport().setMaxX(21000);
             graphView.getViewport().setYAxisBoundsManual(true); // set range of y-axis
             graphView.getViewport().setMinY(0.0);
-            graphView.getViewport().setMaxY(500);
+            graphView.getViewport().setMaxY(100);
             graphView.getViewport().setScalable(true); // make zooming and scrolling active x-axis
             graphView.getViewport().setScalableY(true); // make zooming and scrolling active y-axis
 
-            // setting up min line
-            x_min = 0;
-            Paint min_paint = new Paint();
-            setDashPaint(min_series , min_paint , Color.GREEN);
-            for(int j = 0 ; j < 1000 ; j++) {
-                x_min = x_min + 0.1f;
-                y_min = MIN_MAGNITUDE;
-                min_series.appendData(new DataPoint(x_min , y_min) , true , 1000);
-            }
-            graphView.addSeries(min_series);
-
-            // setting up max line
-            x_max = 0;
-            Paint max_paint = new Paint();
-            setDashPaint(max_series , max_paint , Color.RED);
-            for(int j = 0 ; j < 1000 ; j++) {
-                x_max = x_max + 0.1f;
-                y_max = MAX_MAGNITUDE;
-                max_series.appendData(new DataPoint(x_max , y_max) , true , 1000);
-            }
-            graphView.addSeries(max_series);
+//            // setting up min line
+//            x_min = 0;
+//            Paint min_paint = new Paint();
+//            setDashPaint(min_series , min_paint , Color.GREEN);
+//            for(int j = 0 ; j < 21000 ; j++) {
+//                x_min = j;
+//                y_min = MIN_MAGNITUDE;
+//                min_series.appendData(new DataPoint(x_min , y_min) , true , 21000);
+//            }
+//            graphView.addSeries(min_series);
+//
+//            // setting up max line
+//            x_max = 0;
+//            Paint max_paint = new Paint();
+//            setDashPaint(max_series , max_paint , Color.RED);
+//            for(int j = 0 ; j < 21000 ; j++) {
+//                x_max = j;
+//                y_max = MAX_MAGNITUDE;
+//                max_series.appendData(new DataPoint(x_max , y_max) , true , 21000);
+//            }
+//            graphView.addSeries(max_series);
 
             // set target frq for bicep
             setTargetFrequencyLines(bicep_series , Color.CYAN , BICEP_FRQ);
@@ -399,8 +421,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
         // set target frequencies
         public void setTargetFrequencyLines(BarGraphSeries series , int color , int frq) {
-            series.appendData(new DataPoint(frq / 1000 , 1000) , true , 1);
-            series.setDataWidth(0.2f);
+            series.appendData(new DataPoint(frq , 1000) , true , 1);
+            series.setDataWidth(200f);
             series.setColor(color);
             graphView.addSeries(series);
         }
