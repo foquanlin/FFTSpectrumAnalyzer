@@ -22,6 +22,21 @@
             android:layout_height="200dp"
             android:background="@color/white"/>
 
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="500px"
+            android:id="@+id/spectrum_imageview"
+            android:background="@color/white"/>
+
+        <!--<backend.HorizontalScaleImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"/>-->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -176,16 +191,6 @@
             android:textColor="@color/button_clicked"
             android:layout_gravity="center_horizontal"
             android:onClick="replayRecording"/>
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="500px"
-            android:id="@+id/spectrum_imageview"
-            android:background="@color/white"/>
-
-        <!--<backend.HorizontalScaleImageView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"/>-->
 
         <Space
             android:layout_width="wrap_content"
