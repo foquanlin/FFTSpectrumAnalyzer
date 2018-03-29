@@ -13,20 +13,22 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
         <com.jjoe64.graphview.GraphView
             android:id="@+id/frequency_spectrum"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="@color/white"/>
+            android:background="@color/white" />
 
         <!--<ImageView-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="500px"-->
-            <!--android:id="@+id/spectrum_imageview"-->
-            <!--android:background="@color/white"/>-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="500px"-->
+        <!--android:id="@+id/spectrum_imageview"-->
+        <!--android:background="@color/white"/>-->
 
         <!--<backend.HorizontalScaleImageView-->
         <!--android:layout_width="match_parent"-->
@@ -35,10 +37,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="30dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp">
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -46,11 +48,11 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/bicep_tv"
-                    android:textColor="@color/cyan"
-                    android:text="Bicep"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bicep"
+                    android:textColor="@color/cyan" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -58,18 +60,18 @@
                     android:orientation="horizontal">
 
                     <EditText
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:id="@+id/bicep_frq_et"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:hint="Frequency (Hz)"
-                        android:textColorHint="@color/cyan"
-                        android:textColor="@color/cyan"/>
+                        android:textColor="@color/cyan"
+                        android:textColorHint="@color/cyan" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hz"
-                        android:textColor="@color/white"/>
+                        android:textColor="@color/white" />
 
                 </LinearLayout>
 
@@ -78,7 +80,7 @@
             <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -86,11 +88,11 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:id="@+id/triceps_tv"
-                    android:textColor="@color/yellow"
-                    android:text="Triceps"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Triceps"
+                    android:textColor="@color/yellow" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -98,18 +100,18 @@
                     android:orientation="horizontal">
 
                     <EditText
+                        android:id="@+id/triceps_frq_et"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/triceps_frq_et"
                         android:hint="Frequency (Hz)"
-                        android:textColorHint="@color/yellow"
-                        android:textColor="@color/yellow"/>
+                        android:textColor="@color/yellow"
+                        android:textColorHint="@color/yellow" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hz"
-                        android:textColor="@color/white"/>
+                        android:textColor="@color/white" />
 
                 </LinearLayout>
 
@@ -118,7 +120,7 @@
             <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -126,11 +128,11 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/forearm_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/forearm_tv"
-                    android:textColor="@color/magenta"
-                    android:text="Forearm"/>
+                    android:text="Forearm"
+                    android:textColor="@color/magenta" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -138,18 +140,18 @@
                     android:orientation="horizontal">
 
                     <EditText
+                        android:id="@+id/forearm_frq_et"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/forearm_frq_et"
                         android:hint="Frequency (Hz)"
-                        android:textColorHint="@color/magenta"
-                        android:textColor="@color/magenta" />
+                        android:textColor="@color/magenta"
+                        android:textColorHint="@color/magenta" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Hz"
-                        android:textColor="@color/white"/>
+                        android:textColor="@color/white" />
 
                 </LinearLayout>
 
@@ -158,34 +160,34 @@
         </LinearLayout>
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/update_frq_btn"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="updateFrequency"
             android:text="Update Frequency"
-            style="?android:attr/borderlessButtonStyle"
-            android:textColor="@color/button_clicked"
-            android:layout_gravity="center_horizontal"
-            android:onClick="updateFrequency"/>
+            android:textColor="@color/button_clicked" />
 
         <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:id="@+id/start_recording_btn"
-            android:text="Start Recording"
             style="?android:attr/borderlessButtonStyle"
-            android:textColor="@color/button_clicked"
-            android:layout_gravity="center_horizontal"
-            android:onClick="startRecording"/>
-
-        <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/replay_recording_btn"
-            android:text="Replay Recording"
-            style="?android:attr/borderlessButtonStyle"
-            android:textColor="@color/button_clicked"
             android:layout_gravity="center_horizontal"
-            android:onClick="replayRecording"/>
+            android:onClick="startRecording"
+            android:text="Start Recording"
+            android:textColor="@color/button_clicked" />
+
+        <Button
+            android:id="@+id/replay_recording_btn"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="replayRecording"
+            android:text="Replay Recording"
+            android:textColor="@color/button_clicked" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -194,30 +196,33 @@
 
             <ImageView
                 android:id="@+id/bicep_iv"
-                android:layout_width="7dp"
-                android:layout_height="100dp"
-                android:layout_alignParentStart="true"
+                android:layout_width="4dp"
+                android:layout_height="130dp"
                 android:layout_alignParentTop="true"
-                android:layout_marginStart="365dp"
-                android:layout_marginTop="105dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="34dp"
+                android:rotation="168"
                 tools:background="@color/green" />
 
             <ImageView
                 android:id="@+id/tricep_iv"
-                android:layout_width="7dp"
-                android:layout_height="100dp"
+                android:layout_width="4dp"
+                android:layout_height="130dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignTop="@+id/bicep_iv"
-                android:layout_marginStart="339dp"
+                android:layout_marginStart="361dp"
+                android:rotation="168"
                 tools:background="@color/green" />
 
             <ImageView
                 android:id="@+id/forearm_iv"
-                android:layout_width="10dp"
-                android:layout_height="110dp"
+                android:layout_width="5dp"
+                android:layout_height="125dp"
                 android:layout_alignParentEnd="true"
-                android:layout_alignTop="@+id/bicep_iv"
-                android:layout_marginEnd="275dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="307dp"
+                android:layout_marginTop="110dp"
+                android:rotation="100"
                 tools:background="@color/green" />
 
         </RelativeLayout>

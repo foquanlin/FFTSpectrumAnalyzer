@@ -119,18 +119,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     }
 
     private void setUpMuscles() {
-        bicep_iv.setPivotX(bicep_iv.getWidth()/2);
-        bicep_iv.setPivotY(bicep_iv.getHeight()/2);
-        bicep_iv.setRotation(168);
-        tricep_iv.setPivotX(bicep_iv.getWidth()/2);
-        tricep_iv.setPivotY(bicep_iv.getHeight()/2);
-        tricep_iv.setRotation(168);
-        forearm_iv.setPivotX(bicep_iv.getWidth()/2);
-        forearm_iv.setPivotY(bicep_iv.getHeight()/2);
-        forearm_iv.setRotation(100);
-        bitmap_bicep = Bitmap.createBitmap(7 , 100 , Bitmap.Config.ARGB_8888);
-        bitmap_tricep = Bitmap.createBitmap(7 , 100 , Bitmap.Config.ARGB_8888);
-        bitmap_forearm = Bitmap.createBitmap(10 , 110 , Bitmap.Config.ARGB_8888);
+        bitmap_bicep = Bitmap.createBitmap(4 , 130 , Bitmap.Config.ARGB_8888);
+        bitmap_tricep = Bitmap.createBitmap(4 , 130 , Bitmap.Config.ARGB_8888);
+        bitmap_forearm = Bitmap.createBitmap(5 , 125 , Bitmap.Config.ARGB_8888);
         canvas_bicep = new Canvas(bitmap_bicep);
         canvas_bicep.drawColor(Color.GREEN);
         canvas_tricep = new Canvas(bitmap_tricep);
