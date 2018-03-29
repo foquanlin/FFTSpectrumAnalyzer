@@ -31,6 +31,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,7 +51,6 @@ import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 
 import FFTLibrary.RealDoubleFFT;
-import backend.FrequencyGraph;
 
 import static android.graphics.Paint.Style.FILL;
 import static android.graphics.Paint.Style.FILL_AND_STROKE;
@@ -64,7 +64,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private EditText triceps_frq_et; // triceps frequency edit text
     private TextView forearm_txtview; // forearm text view
     private EditText forearm_frq_et; // forearm frequency edit text
-    private ImageView bitmap; // bitmap image
+    private ImageView bitmap , bicep_iv , tricep_iv , forearm_iv; // bitmap image
     private Display display; // display of device
     private Point size;
     private Button update_frq_button;
@@ -73,8 +73,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 //    private FrequencyGraph frequencyGraph;
     private ImageView spectrum;
     private Paint paintScale , paintAxis , paintSpectrumDisplay , paintBicep , paintTricep , paintForearm;
-    private Bitmap bitmapScale;
-    private Canvas canvasScale;
+    private Bitmap bitmapScale , bitmap_bicep , bitmap_tricep , bitmap_forearm;
+    private Canvas canvasScale , canvas_bicep , canvas_tricep , canvas_forearm;
     private int width, height, width_bitmap , height_bitmap;
 //    private DisplayMetrics displayM;
     private float xmax , xmin , ymax , ymin;
@@ -91,6 +91,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sound_record_and_analysis); // call the UI
         setUpVariables();
+        setUpMuscles();
         requestRecordAudioPermission();
     }
 
@@ -108,10 +109,40 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         bicep_frq_et.setHint(String.valueOf(BICEP_FRQ));
         triceps_frq_et.setHint(String.valueOf(TRICEPS_FRQ));
         forearm_frq_et.setHint(String.valueOf(FOREARM_FRQ));
-        spectrum = (ImageView) findViewById(R.id.spectrum_imageview);
+        bicep_iv = (ImageView) findViewById(R.id.bicep_iv);
+        tricep_iv = (ImageView) findViewById(R.id.tricep_iv);
+        forearm_iv = (ImageView) findViewById(R.id.forearm_iv);
+//        spectrum = (ImageView) findViewById(R.id.spectrum_imageview);
         display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
         height = display.getHeight() / 4;
+    }
+
+    private void setUpMuscles() {
+        bicep_iv.setPivotX(bicep_iv.getWidth()/2);
+        bicep_iv.setPivotY(bicep_iv.getHeight()/2);
+        bicep_iv.setRotation(168);
+        tricep_iv.setPivotX(bicep_iv.getWidth()/2);
+        tricep_iv.setPivotY(bicep_iv.getHeight()/2);
+        tricep_iv.setRotation(168);
+        forearm_iv.setPivotX(bicep_iv.getWidth()/2);
+        forearm_iv.setPivotY(bicep_iv.getHeight()/2);
+        forearm_iv.setRotation(100);
+        bitmap_bicep = Bitmap.createBitmap(7 , 100 , Bitmap.Config.ARGB_8888);
+        bitmap_tricep = Bitmap.createBitmap(7 , 100 , Bitmap.Config.ARGB_8888);
+        bitmap_forearm = Bitmap.createBitmap(10 , 110 , Bitmap.Config.ARGB_8888);
+        canvas_bicep = new Canvas(bitmap_bicep);
+        canvas_bicep.drawColor(Color.GREEN);
+        canvas_tricep = new Canvas(bitmap_tricep);
+        canvas_tricep.drawColor(Color.GREEN);
+        canvas_forearm = new Canvas(bitmap_forearm);
+        canvas_forearm.drawColor(Color.GREEN);
+        bicep_iv.setImageBitmap(bitmap_bicep);
+        tricep_iv.setImageBitmap(bitmap_tricep);
+        forearm_iv.setImageBitmap(bitmap_forearm);
+        bicep_iv.invalidate();
+        tricep_iv.invalidate();
+        forearm_iv.invalidate();
     }
 
     // update frequency button
@@ -251,8 +282,8 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         public boolean isRecording = false , wasRecording = false , wasRepaying = false , isReplaying = false;
 
 
-        public RecordAudio(ImageView spectrum, Paint paintScale, Paint paintAxis, Paint paintSpectrumDisplay , Bitmap bitmapScale, Canvas canvasScale, int width_bitmap, int height_bitmap, float xmax, float xmin, float ymax, float ymin, int width , int height) {
-            this.spectrum = spectrum;
+        public RecordAudio(/*ImageView spectrum,*/ Paint paintScale, Paint paintAxis, Paint paintSpectrumDisplay , Bitmap bitmapScale, Canvas canvasScale, int width_bitmap, int height_bitmap, float xmax, float xmin, float ymax, float ymin, int width , int height) {
+//            this.spectrum = spectrum;
             this.paintScale = paintScale;
             this.paintAxis = paintAxis;
             this.paintSpectrumDisplay = paintSpectrumDisplay;
@@ -282,7 +313,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         }
 
         private void setUpGraph() {
-            graphView = findViewById(R.id.frequency_spectrum);
+            graphView = (GraphView) findViewById(R.id.frequency_spectrum);
             min_series = new LineGraphSeries<DataPoint>();
             max_series = new LineGraphSeries<DataPoint>();
             bicep_series = new BarGraphSeries<DataPoint>();
@@ -370,94 +401,94 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             graphView.addSeries(series);
         }
 
-        public void setUpSpectrum() {
-            spectrum.setLayoutParams(new LinearLayout.LayoutParams(width , height));
-            bitmapScale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            width_bitmap = bitmapScale.getWidth();
-            height_bitmap = bitmapScale.getHeight();
-            xmax = width_bitmap;
-            ymax = height_bitmap;
-            xmin = 0;
-            ymin = 0;
-            paintScale = new Paint();
-            paintScale.setColor(Color.GRAY);
-            paintScale.setStyle(FILL);
-            paintAxis = new Paint();
-            paintAxis.setColor(Color.BLACK);
-            paintAxis.setStyle(FILL);
-            paintAxis.setStrokeWidth(5);
-            paintSpectrumDisplay = new Paint();
-            paintSpectrumDisplay.setColor(Color.GREEN); //color of the spectrum
-            paintSpectrumDisplay.setStyle(FILL_AND_STROKE);
-            paintSpectrumDisplay.setStrokeWidth(12f);
-            paintBicep = new Paint();
-            paintBicep.setColor(Color.CYAN);
-            paintBicep.setStyle(FILL_AND_STROKE);
-            paintBicep.setStrokeWidth(3);
-            paintTricep = new Paint();
-            paintTricep.setColor(Color.YELLOW);
-            paintTricep.setStyle(FILL_AND_STROKE);
-            paintTricep.setStrokeWidth(3);
-            paintForearm = new Paint();
-            paintForearm.setColor(Color.MAGENTA);
-            paintForearm.setStyle(FILL_AND_STROKE);
-            paintForearm.setStrokeWidth(3);
-            canvasScale = new Canvas(bitmapScale);
-            canvasScale.drawColor(Color.WHITE);
-            spectrum.setImageBitmap(bitmapScale);
-            spectrum.invalidate();
-
-            if (canvasScale == null) {
-                return;
-            }
-
-            int linesBigWidth = (width - 80) / 21;
-            int linesSmallWidth = (width - 80) / 21;
-            int linesBigHeight = (height - 40) / 21;
-            int linesSmallHeight = (height - 40) / 21;
-            canvasScale.drawLine(80, height_bitmap - 40, width, height_bitmap - 40, paintAxis);
-            canvasScale.drawLine(80 , height_bitmap - 40 , 80 , 0 ,paintAxis);
-            for (int i = 80, j = 0; i < width; i = i + linesBigWidth, j++) {
-                for (int k = i; k < (i + linesBigWidth); k = k + linesSmallWidth) {
-                    canvasScale.drawLine(k, height_bitmap - 40, k, height_bitmap - 35, paintScale);
-                }
-                canvasScale.drawLine(i, height_bitmap - 40, i, height_bitmap - 25, paintScale);
-                String text = Integer.toString(j) + " ";
-                if (j % 5 == 0) {
-                    canvasScale.drawLine(i, height_bitmap - 40, i, 0, paintScale);
-                    float textSize = paintScale.getTextSize();
-                    paintScale.setTextSize(textSize * 2.1f);
-                    float x = i;
-                    float w = 31.5f;
-                    if (i != 0) x -= 12.5f;
-                    if (i < 10 * linesBigWidth) w = 17.5f;
-                    canvasScale.drawText(text, x, height_bitmap - 5, paintScale);
-                    paintScale.setTextSize(textSize * 1.3f);
-                    canvasScale.drawText("kHz", x + w, height_bitmap - 5, paintScale);
-                    paintScale.setTextSize(textSize);
-                }
-            }
-            for (int i = 40, j = 0; i < height; i = i + linesBigHeight, j++) {
-                for (int k = i; k < (i + linesBigHeight); k = k + linesSmallHeight) {
-                    canvasScale.drawLine(80, height_bitmap - k, 65, height_bitmap - k, paintScale);
-                }
-//            canvasScale.drawLine(80, i, 75 , i, paintScale);
-                String text = Integer.toString(j * 40) + " ";
-                if (j % 5 == 0) {
-                    canvasScale.drawLine(80 , height_bitmap - i , width , height_bitmap - i , paintScale);
-                    float textSize = paintScale.getTextSize();
-                    paintScale.setTextSize(textSize * 2.1f);
-                    float y = height_bitmap - i;
-                    float w = 41.5f;
-                    if (i != 0) y += 12.5f;
-                    if (i < 10 * linesBigHeight) w = 37.5f;
-                    canvasScale.drawText(text, 5, y, paintScale);
-                    paintScale.setTextSize(textSize * 1.3f);
-                    canvasScale.drawText("dB", 5 + w, y, paintScale);
-                    paintScale.setTextSize(textSize);
-                }
-            }
-        }
+//        public void setUpSpectrum() {
+//            spectrum.setLayoutParams(new LinearLayout.LayoutParams(width , height));
+//            bitmapScale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+//            width_bitmap = bitmapScale.getWidth();
+//            height_bitmap = bitmapScale.getHeight();
+//            xmax = width_bitmap;
+//            ymax = height_bitmap;
+//            xmin = 0;
+//            ymin = 0;
+//            paintScale = new Paint();
+//            paintScale.setColor(Color.GRAY);
+//            paintScale.setStyle(FILL);
+//            paintAxis = new Paint();
+//            paintAxis.setColor(Color.BLACK);
+//            paintAxis.setStyle(FILL);
+//            paintAxis.setStrokeWidth(5);
+//            paintSpectrumDisplay = new Paint();
+//            paintSpectrumDisplay.setColor(Color.GREEN); //color of the spectrum
+//            paintSpectrumDisplay.setStyle(FILL_AND_STROKE);
+//            paintSpectrumDisplay.setStrokeWidth(12f);
+//            paintBicep = new Paint();
+//            paintBicep.setColor(Color.CYAN);
+//            paintBicep.setStyle(FILL_AND_STROKE);
+//            paintBicep.setStrokeWidth(3);
+//            paintTricep = new Paint();
+//            paintTricep.setColor(Color.YELLOW);
+//            paintTricep.setStyle(FILL_AND_STROKE);
+//            paintTricep.setStrokeWidth(3);
+//            paintForearm = new Paint();
+//            paintForearm.setColor(Color.MAGENTA);
+//            paintForearm.setStyle(FILL_AND_STROKE);
+//            paintForearm.setStrokeWidth(3);
+//            canvasScale = new Canvas(bitmapScale);
+//            canvasScale.drawColor(Color.WHITE);
+//            spectrum.setImageBitmap(bitmapScale);
+//            spectrum.invalidate();
+//
+//            if (canvasScale == null) {
+//                return;
+//            }
+//
+//            int linesBigWidth = (width - 80) / 21;
+//            int linesSmallWidth = (width - 80) / 21;
+//            int linesBigHeight = (height - 40) / 21;
+//            int linesSmallHeight = (height - 40) / 21;
+//            canvasScale.drawLine(80, height_bitmap - 40, width, height_bitmap - 40, paintAxis);
+//            canvasScale.drawLine(80 , height_bitmap - 40 , 80 , 0 ,paintAxis);
+//            for (int i = 80, j = 0; i < width; i = i + linesBigWidth, j++) {
+//                for (int k = i; k < (i + linesBigWidth); k = k + linesSmallWidth) {
+//                    canvasScale.drawLine(k, height_bitmap - 40, k, height_bitmap - 35, paintScale);
+//                }
+//                canvasScale.drawLine(i, height_bitmap - 40, i, height_bitmap - 25, paintScale);
+//                String text = Integer.toString(j) + " ";
+//                if (j % 5 == 0) {
+//                    canvasScale.drawLine(i, height_bitmap - 40, i, 0, paintScale);
+//                    float textSize = paintScale.getTextSize();
+//                    paintScale.setTextSize(textSize * 2.1f);
+//                    float x = i;
+//                    float w = 31.5f;
+//                    if (i != 0) x -= 12.5f;
+//                    if (i < 10 * linesBigWidth) w = 17.5f;
+//                    canvasScale.drawText(text, x, height_bitmap - 5, paintScale);
+//                    paintScale.setTextSize(textSize * 1.3f);
+//                    canvasScale.drawText("kHz", x + w, height_bitmap - 5, paintScale);
+//                    paintScale.setTextSize(textSize);
+//                }
+//            }
+//            for (int i = 40, j = 0; i < height; i = i + linesBigHeight, j++) {
+//                for (int k = i; k < (i + linesBigHeight); k = k + linesSmallHeight) {
+//                    canvasScale.drawLine(80, height_bitmap - k, 65, height_bitmap - k, paintScale);
+//                }
+////            canvasScale.drawLine(80, i, 75 , i, paintScale);
+//                String text = Integer.toString(j * 40) + " ";
+//                if (j % 5 == 0) {
+//                    canvasScale.drawLine(80 , height_bitmap - i , width , height_bitmap - i , paintScale);
+//                    float textSize = paintScale.getTextSize();
+//                    paintScale.setTextSize(textSize * 2.1f);
+//                    float y = height_bitmap - i;
+//                    float w = 41.5f;
+//                    if (i != 0) y += 12.5f;
+//                    if (i < 10 * linesBigHeight) w = 37.5f;
+//                    canvasScale.drawText(text, 5, y, paintScale);
+//                    paintScale.setTextSize(textSize * 1.3f);
+//                    canvasScale.drawText("dB", 5 + w, y, paintScale);
+//                    paintScale.setTextSize(textSize);
+//                }
+//            }
+//        }
 
         private double[] freqMagnitude(double [] toTransform) {
             real = new double[blockSize];
@@ -492,6 +523,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             super.onPreExecute();
             transformer = new RealDoubleFFT(blockSize);
             dataPoints = new DataPoint[]{new DataPoint(1 , 1)};
+//            setUpMuscles();
         }
 
         @Override
@@ -616,7 +648,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         @Override
         protected void onProgressUpdate(double[]...progress) {
             Log.e("RecordingProgress", "Displaying in progress");
-            canvasScale.drawColor(Color.WHITE);
+//            canvasScale.drawColor(Color.WHITE);
 //            mTimer = new Runnable() {
 //                @Override
 //                public void run() {
@@ -627,23 +659,23 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             graphView.removeSeries(sound_series);
             sound_series.resetData(generateData(progress));
 //            frq_series.resetData(dataPoints);
-            setUpSpectrum();
+//            setUpSpectrum();
             double mMaxFFTSample = 150.0;
             Log.d("Test:", Integer.toString(progress[0].length));
 
-            int lower = 1;
-            int upper = 1;
-            double freqGap = (((double) sampleRate) / ((double) blockSize));
-            int line_position_Bicep = 12 * (Math.round((float)((double) BICEP_FRQ / freqGap))) + 80; // line indicating bicep frequency
-            int line_position_Triceps = 12 * (Math.round((float)((double)TRICEPS_FRQ / freqGap))) + 80; // line indicating triceps frequency
-            int line_position_Forearm = 12 * (Math.round((float)((double) FOREARM_FRQ / freqGap))) + 80; // line indicating forearm frequency
-
-            for (int i = 0 ; i < progress[0].length ; i++) {
-                    int fs = 12 * i + 80;
-                    lower = (int) ((height - 40) - progress[0][i] * 10);
-                    upper = height - 40;
-                    canvasScale.drawLine(fs, lower, fs, upper , paintSpectrumDisplay);
-            }
+//            int lower = 1;
+//            int upper = 1;
+//            double freqGap = (((double) sampleRate) / ((double) blockSize));
+//            int line_position_Bicep = 12 * (Math.round((float)((double) BICEP_FRQ / freqGap))) + 80; // line indicating bicep frequency
+//            int line_position_Triceps = 12 * (Math.round((float)((double)TRICEPS_FRQ / freqGap))) + 80; // line indicating triceps frequency
+//            int line_position_Forearm = 12 * (Math.round((float)((double) FOREARM_FRQ / freqGap))) + 80; // line indicating forearm frequency
+//
+//            for (int i = 0 ; i < progress[0].length ; i++) {
+//                    int fs = 12 * i + 80;
+//                    lower = (int) ((height - 40) - progress[0][i] * 10);
+//                    upper = height - 40;
+//                    canvasScale.drawLine(fs, lower, fs, upper , paintSpectrumDisplay);
+//            }
 
             sound_series = new LineGraphSeries<>(generateData(progress));
 //            sound_series.setColor(Color.BLUE);
@@ -651,12 +683,12 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             sound_series.setBackgroundColor(Color.rgb(0 , 157 , 255));
             sound_series.setDrawBackground(true);
             graphView.addSeries(sound_series);
-            canvasScale.drawLine(line_position_Bicep , height_bitmap - 40 , line_position_Bicep , 0 , paintBicep);
-            canvasScale.drawLine(line_position_Triceps , height_bitmap - 40 , line_position_Triceps , 0 , paintTricep);
-            canvasScale.drawLine(line_position_Forearm , height_bitmap - 40 , line_position_Forearm , 0 , paintForearm);
+//            canvasScale.drawLine(line_position_Bicep , height_bitmap - 40 , line_position_Bicep , 0 , paintBicep);
+//            canvasScale.drawLine(line_position_Triceps , height_bitmap - 40 , line_position_Triceps , 0 , paintTricep);
+//            canvasScale.drawLine(line_position_Forearm , height_bitmap - 40 , line_position_Forearm , 0 , paintForearm);
 
 
-            spectrum.invalidate();
+//            spectrum.invalidate();
         }
 
         @Override
@@ -673,9 +705,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        recordTask = new RecordAudio(spectrum , paintScale , paintAxis , paintSpectrumDisplay , bitmapScale , canvasScale , width_bitmap , height_bitmap , xmax , xmin , ymax , ymin , width , height);
+        recordTask = new RecordAudio(/*spectrum ,*/ paintScale , paintAxis , paintSpectrumDisplay , bitmapScale , canvasScale , width_bitmap , height_bitmap , xmax , xmin , ymax , ymin , width , height);
         recordTask.setUpGraph();
-        recordTask.setUpSpectrum();
+//        recordTask.setUpSpectrum();
         recordTask.execute();
     }
 }

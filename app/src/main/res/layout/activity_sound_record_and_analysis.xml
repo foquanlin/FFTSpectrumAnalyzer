@@ -22,16 +22,11 @@
             android:layout_height="200dp"
             android:background="@color/white"/>
 
-        <Space
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="500px"
-            android:id="@+id/spectrum_imageview"
-            android:background="@color/white"/>
+        <!--<ImageView-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="500px"-->
+            <!--android:id="@+id/spectrum_imageview"-->
+            <!--android:background="@color/white"/>-->
 
         <!--<backend.HorizontalScaleImageView-->
         <!--android:layout_width="match_parent"-->
@@ -192,10 +187,40 @@
             android:layout_gravity="center_horizontal"
             android:onClick="replayRecording"/>
 
-        <Space
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/bicep_iv"
+                android:layout_width="7dp"
+                android:layout_height="100dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginStart="365dp"
+                android:layout_marginTop="105dp"
+                tools:background="@color/green" />
+
+            <ImageView
+                android:id="@+id/tricep_iv"
+                android:layout_width="7dp"
+                android:layout_height="100dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignTop="@+id/bicep_iv"
+                android:layout_marginStart="339dp"
+                tools:background="@color/green" />
+
+            <ImageView
+                android:id="@+id/forearm_iv"
+                android:layout_width="10dp"
+                android:layout_height="110dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/bicep_iv"
+                android:layout_marginEnd="275dp"
+                tools:background="@color/green" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 
