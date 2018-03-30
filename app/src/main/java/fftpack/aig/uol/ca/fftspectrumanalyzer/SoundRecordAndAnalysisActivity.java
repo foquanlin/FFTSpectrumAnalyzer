@@ -371,27 +371,27 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             graphView.getViewport().setScalable(true); // make zooming and scrolling active x-axis
             graphView.getViewport().setScalableY(true); // make zooming and scrolling active y-axis
 
-//            // setting up min line
-//            x_min = 0;
-//            Paint min_paint = new Paint();
-//            setDashPaint(min_series , min_paint , Color.GREEN);
-//            for(int j = 0 ; j < 21000 ; j++) {
-//                x_min = j;
-//                y_min = MIN_MAGNITUDE;
-//                min_series.appendData(new DataPoint(x_min , y_min) , true , 21000);
-//            }
-//            graphView.addSeries(min_series);
-//
-//            // setting up max line
-//            x_max = 0;
-//            Paint max_paint = new Paint();
-//            setDashPaint(max_series , max_paint , Color.RED);
-//            for(int j = 0 ; j < 21000 ; j++) {
-//                x_max = j;
-//                y_max = MAX_MAGNITUDE;
-//                max_series.appendData(new DataPoint(x_max , y_max) , true , 21000);
-//            }
-//            graphView.addSeries(max_series);
+            // setting up min line
+            x_min = 0;
+            Paint min_paint = new Paint();
+            setDashPaint(min_series , min_paint , Color.GREEN);
+            for(int j = 0 ; j < 128 ; j++) {
+                x_min = (21000 / 128) * j;
+                y_min = MIN_MAGNITUDE;
+                min_series.appendData(new DataPoint(x_min , y_min) , true , 128);
+            }
+            graphView.addSeries(min_series);
+
+            // setting up max line
+            x_max = 0;
+            Paint max_paint = new Paint();
+            setDashPaint(max_series , max_paint , Color.RED);
+            for(int j = 0 ; j < 128 ; j++) {
+                x_max = (21000 / 128) * j;
+                y_max = MAX_MAGNITUDE;
+                max_series.appendData(new DataPoint(x_max , y_max) , true , 128);
+            }
+            graphView.addSeries(max_series);
 
             // set target frq for bicep
             setTargetFrequencyLines(bicep_series , Color.CYAN , BICEP_FRQ);
@@ -413,7 +413,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(3);
             paint.setColor(color);
-            DashPathEffect dashPathEffect = new DashPathEffect(new float[]{8, 5}, 0);
+            DashPathEffect dashPathEffect = new DashPathEffect(new float[]{2000, 2000}, 0);
             paint.setPathEffect(dashPathEffect);
             paint.setAntiAlias(true);
             series.setCustomPaint(paint);
