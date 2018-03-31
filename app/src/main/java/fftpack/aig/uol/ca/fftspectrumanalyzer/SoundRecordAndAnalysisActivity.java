@@ -305,84 +305,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                 double y = progress[0][i];
                 DataPoint v = new DataPoint(x , y);
                 values[i] = v;
-                if (magnitude[i] >= MIN_MAGNITUDE  && magnitude[i] <= ((MIN_MAGNITUDE + MAX_MAGNITUDE) / 2)) {
-                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
-                        bicepActive = true;
-                        canvas_bicep.drawColor(Color.YELLOW);
-                    }
-                    else {
-                        bicepActive = false;
-                        canvas_bicep.drawColor(Color.GREEN);
-                    }
-                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
-                        tricepActive = true;
-                        canvas_tricep.drawColor(Color.YELLOW);
-                    }
-                    else {
-                        tricepActive = false;
-                        canvas_tricep.drawColor(Color.GREEN);
-                    }
-                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
-                        forearmActive = true;
-                        canvas_forearm.drawColor(Color.YELLOW);
-                    }
-                    else {
-                        forearmActive = false;
-                        canvas_forearm.drawColor(Color.GREEN);
-                    }
-                }
-                if (magnitude[i] > ((MIN_MAGNITUDE + MAX_MAGNITUDE) / 2)  && magnitude[i] <= MAX_MAGNITUDE) {
-                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
-                        bicepActive = true;
-                        canvas_bicep.drawColor(Color.rgb(255 , 165 , 0));
-                    }
-                    else {
-                        bicepActive = false;
-                        canvas_bicep.drawColor(Color.GREEN);
-                    }
-                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
-                        tricepActive = true;
-                        canvas_tricep.drawColor(Color.rgb(255 , 165 , 0));
-                    }
-                    else {
-                        tricepActive = false;
-                        canvas_tricep.drawColor(Color.GREEN);
-                    }
-                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
-                        forearmActive = true;
-                        canvas_forearm.drawColor(Color.rgb(255 , 165 , 0));
-                    }
-                    else {
-                        forearmActive = false;
-                        canvas_forearm.drawColor(Color.GREEN);
-                    }
-                }
-                if (magnitude[i] > MAX_MAGNITUDE) {
-                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
-                        bicepActive = true;
-                        canvas_bicep.drawColor(Color.RED);
-                    }
-                    else {
-                        bicepActive = false;
-                        canvas_bicep.drawColor(Color.GREEN);
-                    }
-                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
-                        tricepActive = true;
-                        canvas_tricep.drawColor(Color.RED);
-                    }
-                    else {
-                        tricepActive = false;
-                        canvas_tricep.drawColor(Color.GREEN);
-                    }
-                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
-                        forearmActive = true;
-                        canvas_forearm.drawColor(Color.RED);
-                    }
-                    else {
-                        forearmActive = false;
-                        canvas_forearm.drawColor(Color.GREEN);
-                    }
-                }
             }
             return values;
         }
@@ -735,9 +657,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             sound_series.resetData(generateData(progress));
 //            frq_series.resetData(dataPoints);
 //            setUpSpectrum();
-            double mMaxFFTSample = 150.0;
-            Log.d("Test:", Integer.toString(progress[0].length));
-
+//            double mMaxFFTSample = 150.0;
 //            int lower = 1;
 //            int upper = 1;
 //            double freqGap = (((double) sampleRate) / ((double) blockSize));
@@ -758,6 +678,64 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             sound_series.setBackgroundColor(Color.rgb(0 , 157 , 255));
             sound_series.setDrawBackground(true);
             graphView.addSeries(sound_series);
+            for(int i = 0 ; i < progress[0].length ; i++) {
+                if (progress[0][i] >= MIN_MAGNITUDE  && progress[0][i] <= ((MIN_MAGNITUDE + MAX_MAGNITUDE) / 2)) {
+                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
+                        bicepActive = true;
+                        canvas_bicep.drawColor(Color.YELLOW);
+                    }
+                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
+                        tricepActive = true;
+                        canvas_tricep.drawColor(Color.YELLOW);
+                    }
+                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
+                        forearmActive = true;
+                        canvas_forearm.drawColor(Color.YELLOW);
+                    }
+                }
+                if (progress[0][i] > ((MIN_MAGNITUDE + MAX_MAGNITUDE) / 2)  && progress[0][i] <= MAX_MAGNITUDE) {
+                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
+                        bicepActive = true;
+                        canvas_bicep.drawColor(Color.rgb(255 , 165 , 0));
+                    }
+                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
+                        tricepActive = true;
+                        canvas_tricep.drawColor(Color.rgb(255 , 165 , 0));
+                    }
+                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
+                        forearmActive = true;
+                        canvas_forearm.drawColor(Color.rgb(255 , 165 , 0));
+                    }
+                }
+                if (progress[0][i] > MAX_MAGNITUDE) {
+                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
+                        bicepActive = true;
+                        canvas_bicep.drawColor(Color.RED);
+                    }
+                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
+                        tricepActive = true;
+                        canvas_tricep.drawColor(Color.RED);
+                    }
+                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
+                        forearmActive = true;
+                        canvas_forearm.drawColor(Color.RED);
+                    }
+                }
+                if(progress[0][i] < MIN_MAGNITUDE) {
+                    if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
+                        bicepActive = false;
+                        canvas_bicep.drawColor(Color.GREEN);
+                    }
+                    if(frequency[i] > (TRICEPS_FRQ - margin) && frequency[i] < (TRICEPS_FRQ + margin)) {
+                        tricepActive = false;
+                        canvas_tricep.drawColor(Color.GREEN);
+                    }
+                    if(frequency[i] > (FOREARM_FRQ - margin) && frequency[i] < (FOREARM_FRQ + margin)) {
+                        forearmActive = false;
+                        canvas_forearm.drawColor(Color.GREEN);
+                    }
+                }
+            }
 //            canvasScale.drawLine(line_position_Bicep , height_bitmap - 40 , line_position_Bicep , 0 , paintBicep);
 //            canvasScale.drawLine(line_position_Triceps , height_bitmap - 40 , line_position_Triceps , 0 , paintTricep);
 //            canvasScale.drawLine(line_position_Forearm , height_bitmap - 40 , line_position_Forearm , 0 , paintForearm);
