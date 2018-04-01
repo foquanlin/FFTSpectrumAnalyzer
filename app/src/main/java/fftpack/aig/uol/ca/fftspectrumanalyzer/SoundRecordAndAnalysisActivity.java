@@ -298,7 +298,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                         return super.formatLabel(value / 1000, isValueX) + "kHz";
                     } else {
                         // show currency for y_frq values
-                        return super.formatLabel(value / 1000, isValueX) + "dB";
+                        return super.formatLabel(value, isValueX) + "dB";
                     }
                 }
             });
