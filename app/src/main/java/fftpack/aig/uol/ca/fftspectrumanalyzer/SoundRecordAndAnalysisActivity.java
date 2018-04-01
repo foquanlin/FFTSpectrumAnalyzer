@@ -27,6 +27,7 @@ import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -72,7 +73,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private Bitmap bitmap_bicep , bitmap_tricep , bitmap_forearm;
     private Canvas canvas_bicep , canvas_tricep , canvas_forearm;
     private int width, height;
-//    private DisplayMetrics displayM;
     private float xmax , xmin , ymax , ymin;
 
     private LineGraphSeries<DataPoint> min_series , max_series , sound_series; // data for the graph
@@ -108,7 +108,6 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         bicep_iv = (ImageView) findViewById(R.id.bicep_iv);
         tricep_iv = (ImageView) findViewById(R.id.tricep_iv);
         forearm_iv = (ImageView) findViewById(R.id.forearm_iv);
-//        spectrum = (ImageView) findViewById(R.id.spectrum_imageview);
         display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
         height = display.getHeight() / 4;
@@ -272,7 +271,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             DataPoint[] values = new DataPoint[count];
             for(int i = 0 ; i < count ; i++) {
                 double x = (21000 / 128) * i;
-                double y = progress[0][i];
+                double y = progress[0][i] * 10;
                 DataPoint v = new DataPoint(x , y);
                 values[i] = v;
             }
@@ -296,10 +295,10 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                 public String formatLabel(double value , boolean isValueX) {
                     if (isValueX) {
                         // show normal x_frq values
-                        return super.formatLabel(value, isValueX) + "Hz";
+                        return super.formatLabel(value / 1000, isValueX) + "kHz";
                     } else {
                         // show currency for y_frq values
-                        return super.formatLabel(value, isValueX) + "dB";
+                        return super.formatLabel(value / 1000, isValueX) + "dB";
                     }
                 }
             });
@@ -363,7 +362,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         // set target frequencies
         public void setTargetFrequencyLines(BarGraphSeries series , int color , int frq) {
             series.appendData(new DataPoint(frq , 1000) , true , 1);
-            series.setDataWidth(200f);
+            series.setDataWidth(300f);
             series.setColor(color);
             graphView.addSeries(series);
         }
@@ -534,7 +533,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             sound_series.setDrawBackground(true);
             graphView.addSeries(sound_series);
             for(int i = 0 ; i < progress[0].length ; i++) {
-                if(progress[0][i] >= MIN_MAGNITUDE && progress[0][i] < MID_MAGNITUDE) {
+                if(progress[0][i] * 10 >= MIN_MAGNITUDE && progress[0][i] * 10 < MID_MAGNITUDE) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = true;
                         int green_value = (int) (Math.max((MAX_MAGNITUDE - progress[0][i])/ MAX_MAGNITUDE , 0)  * 255);
@@ -552,7 +551,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                         canvas_forearm.drawColor(Color.rgb(red_value , 255 , 0));
                     }
                 }
-                if (progress[0][i] >= MID_MAGNITUDE) {
+                if (progress[0][i] * 10 >= MID_MAGNITUDE) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = true;
                         int green_value = (int) (Math.max((MAX_MAGNITUDE - progress[0][i])/ MAX_MAGNITUDE , 0)  * 255);
@@ -569,7 +568,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                         canvas_forearm.drawColor(Color.rgb(255 , green_value , 0));
                     }
                 }
-                if(progress[0][i] < MIN_MAGNITUDE) {
+                if(progress[0][i] * 10 < MIN_MAGNITUDE) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = false;
                         canvas_bicep.drawColor(Color.GREEN);
