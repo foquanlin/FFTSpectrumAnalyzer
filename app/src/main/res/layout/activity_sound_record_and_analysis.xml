@@ -24,16 +24,6 @@
             android:layout_height="200dp"
             android:background="@color/white" />
 
-        <!--<ImageView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="500px"-->
-        <!--android:id="@+id/spectrum_imageview"-->
-        <!--android:background="@color/white"/>-->
-
-        <!--<backend.HorizontalScaleImageView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"/>-->
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
