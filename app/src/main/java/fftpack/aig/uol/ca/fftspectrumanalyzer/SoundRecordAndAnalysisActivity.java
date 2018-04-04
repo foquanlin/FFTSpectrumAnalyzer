@@ -1,14 +1,12 @@
 package fftpack.aig.uol.ca.fftspectrumanalyzer;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -21,20 +19,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.widget.AbsoluteLayout;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
@@ -53,7 +46,6 @@ import java.nio.ByteBuffer;
 
 import FFTLibrary.RealDoubleFFT;
 
-import static android.graphics.Paint.Style.FILL;
 import static android.graphics.Paint.Style.FILL_AND_STROKE;
 
 public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
@@ -72,6 +64,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private Button start_recording_button;
     private Bitmap bitmap_bicep , bitmap_tricep , bitmap_forearm;
     private Canvas canvas_bicep , canvas_tricep , canvas_forearm;
+//    private TextView progress_tv , magnitude_tv , frequency_tv;
     private int width, height;
     private float xmax , xmin , ymax , ymin;
 
@@ -108,6 +101,9 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         bicep_iv = (ImageView) findViewById(R.id.bicep_iv);
         tricep_iv = (ImageView) findViewById(R.id.tricep_iv);
         forearm_iv = (ImageView) findViewById(R.id.forearm_iv);
+//        progress_tv = (TextView) findViewById(R.id.progress);
+//        magnitude_tv = (TextView) findViewById(R.id.magnitude);
+//        frequency_tv = (TextView) findViewById(R.id.frequency);
         display = getWindowManager().getDefaultDisplay();
         width = display.getWidth();
         height = display.getHeight() / 4;
@@ -238,7 +234,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
         boolean CANCELLED_FLAG = false;
         double[][] cancelledResult = {{100}};
         private double[] real , imaginary , magnitude , frequency;
-        int sampleRate = 44100;
+        int sampleRate = 42000;
         int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
         int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
         DataPoint[] dataPoints;
@@ -271,7 +267,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             DataPoint[] values = new DataPoint[count];
             for(int i = 0 ; i < count ; i++) {
                 double x = (21000 / 128) * i;
-                double y = progress[0][i] * 10;
+                double y = progress[0][i];
                 DataPoint v = new DataPoint(x , y);
                 values[i] = v;
             }
@@ -379,7 +375,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             }
 
             for (int i = 0 ; i < blockSize / 2 ; i++) {
-                magnitude[i] = 0.7 * (Math.sqrt((real[i] * real[i]) + (imaginary[i] * imaginary[i]))); // magnitude is calculated by the square root of (imaginary^2 + real^2)
+                magnitude[i] = (Math.sqrt((real[i] * real[i]) + (imaginary[i] * imaginary[i]))); // magnitude is calculated by the square root of (imaginary^2 + real^2)
                 frequency[i] = i * (sampleRate) / (blockSize); // calculated the frequency
             }
 
@@ -524,7 +520,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
 
         @Override
         protected void onProgressUpdate(double[]...progress) {
-            Log.e("RecordingProgress", "Displaying in progress");
+            Log.e("RecordingProgress", "Displaying in progress_tv");
             graphView.removeSeries(sound_series);
             sound_series.resetData(generateData(progress));
             sound_series = new LineGraphSeries<>(generateData(progress));
@@ -533,10 +529,12 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
             sound_series.setDrawBackground(true);
             graphView.addSeries(sound_series);
             for(int i = 0 ; i < progress[0].length ; i++) {
-                if(progress[0][i] * 10 >= MIN_MAGNITUDE && progress[0][i] * 10 < MID_MAGNITUDE) {
+//                progress_tv.setText("Progress = " + Double.toString(progress[0][i]));
+//                magnitude_tv.setText("Magnitude = " + Double.toString(magnitude[i]));
+//                frequency_tv.setText("Frequency = " + Double.toString(frequency[i]));
+                if(progress[0][i] >= MIN_MAGNITUDE && progress[0][i] < MID_MAGNITUDE) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = true;
-                        int green_value = (int) (Math.max((MAX_MAGNITUDE - progress[0][i])/ MAX_MAGNITUDE , 0)  * 255);
                         int red_value = (int) (Math.min((progress[0][i] / MAX_MAGNITUDE) , 1) * 255);
                         canvas_bicep.drawColor(Color.rgb(red_value , 255 , 0));
                     }
@@ -551,7 +549,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                         canvas_forearm.drawColor(Color.rgb(red_value , 255 , 0));
                     }
                 }
-                if (progress[0][i] * 10 >= MID_MAGNITUDE) {
+                if (progress[0][i] >= MID_MAGNITUDE) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = true;
                         int green_value = (int) (Math.max((MAX_MAGNITUDE - progress[0][i])/ MAX_MAGNITUDE , 0)  * 255);
@@ -568,7 +566,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
                         canvas_forearm.drawColor(Color.rgb(255 , green_value , 0));
                     }
                 }
-                if(progress[0][i] * 10 < MIN_MAGNITUDE) {
+                if(progress[0][i] < MIN_MAGNITUDE) {
                     if(frequency[i] > (BICEP_FRQ - margin) && frequency[i] < (BICEP_FRQ + margin)) {
                         bicepActive = false;
                         canvas_bicep.drawColor(Color.GREEN);
