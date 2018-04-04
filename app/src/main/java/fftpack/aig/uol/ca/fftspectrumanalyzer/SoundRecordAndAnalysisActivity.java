@@ -71,7 +71,7 @@ public class SoundRecordAndAnalysisActivity extends AppCompatActivity {
     private LineGraphSeries<DataPoint> min_series , max_series , sound_series; // data for the graph
     private BarGraphSeries<DataPoint> bicep_series , triceps_series , forearm_series;
     private double x_min , y_min , x_max , y_max; // x_frq and y_frq coordinates
-    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 2000 , FOREARM_FRQ = 4000 , MAX_MAGNITUDE = 90 , MIN_MAGNITUDE = 10 , MID_MAGNITUDE = 50 , margin = 250;
+    private int BICEP_FRQ = 1000 , TRICEPS_FRQ = 7000 , FOREARM_FRQ = 14000 , MAX_MAGNITUDE = 90 , MIN_MAGNITUDE = 10 , MID_MAGNITUDE = 50 , margin = 250;
 
     RecordAudio recordTask;
 
